@@ -1,0 +1,2031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Health Facility Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --navy:#004080;
+  --navy-dark:#002d5a;
+  --gold:#ffc107;
+  --ink:#1f2733;
+  --muted:#6b7683;
+  --line:#d9dee5;
+  --bg:#eef1f5;
+  --white:#ffffff;
+  --danger:#b3261e;
+  --green:#2e7d32;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Roboto',Arial,Helvetica,sans-serif;
+  font-size:15px;
+  line-height:1.45;
+  padding-bottom:40px;
+}
+h1,h2,h3,.tab,.pill,.btn,.lvl,.badge{font-family:'Oswald','Arial Narrow',Arial,sans-serif;letter-spacing:.4px}
+
+header{background:var(--navy);border-bottom:5px solid var(--gold);padding:14px 16px 12px}
+header h1{margin:0;color:var(--white);font-size:22px;font-weight:600;text-transform:uppercase}
+header p{margin:2px 0 0;color:#bcd2e8;font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.brandbar{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.brandbar .logo{height:54px;width:auto;flex:0 0 auto;background:var(--white);padding:5px;border-radius:3px;object-fit:contain}
+.brandtext{flex:1 1 auto;min-width:0;text-align:center}
+
+.tabs{display:flex;background:var(--navy-dark);overflow-x:auto}
+.tab{flex:1 0 auto;padding:12px 10px;text-align:center;color:#c9d8e8;font-size:15px;text-transform:uppercase;cursor:pointer;border:0;background:none;border-bottom:4px solid transparent;white-space:nowrap}
+.tab.on{color:var(--white);border-bottom-color:var(--gold);background:rgba(255,255,255,.06)}
+.tab:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
+
+.wrap{max-width:1080px;margin:0 auto;padding:16px}
+.panel{display:none}
+.panel.on{display:block}
+
+.card{background:var(--white);border:2px solid var(--navy);outline:1px solid var(--navy);outline-offset:3px;padding:16px;margin:6px 2px 22px}
+.card h2{margin:0 0 14px;font-size:17px;text-transform:uppercase;color:var(--navy);border-bottom:2px solid var(--gold);padding-bottom:7px}
+.card h3{margin:16px 0 10px;font-size:15px;text-transform:uppercase;color:var(--navy)}
+
+label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--navy);margin:0 0 5px}
+input,select,textarea{width:100%;padding:11px 10px;border:1px solid var(--line);border-radius:3px;font-family:inherit;font-size:15px;background:#fbfcfd;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,64,128,.15);background:var(--white)}
+textarea{resize:vertical;min-height:64px}
+select[multiple]{min-height:170px;background:var(--white)}
+.field{margin-bottom:14px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row .field{flex:1 1 220px;margin-bottom:14px}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.req{color:var(--danger)}
+.err{display:none;margin-top:5px;font-size:12.5px;color:var(--danger);font-weight:500}
+.err.on{display:block}
+input.bad,select.bad{border-color:var(--danger);box-shadow:0 0 0 3px rgba(179,38,30,.14)}
+
+.btn{display:inline-block;padding:11px 18px;border:0;border-radius:3px;background:var(--navy);color:var(--white);font-size:15px;text-transform:uppercase;cursor:pointer}
+.btn:hover{background:var(--navy-dark)}
+.btn.gold{background:var(--gold);color:#3a2d00;font-weight:600}
+.btn.gold:hover{background:#e9ae00}
+.btn.ghost{background:var(--white);color:var(--navy);border:1px solid var(--navy)}
+.btn.ghost:hover{background:#eaf1f8}
+.btn.red{background:var(--danger)}
+.btn.red:hover{background:#8f1e17}
+.btn.green{background:var(--green)}
+.btn.green:hover{background:#1b5e20}
+.btn.sm{padding:7px 12px;font-size:13px}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn.block{width:100%}
+.btn.busy{opacity:.6;cursor:progress}
+.form-foot{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+
+.msg{margin:0 0 14px;padding:11px 12px;border-left:5px solid var(--gold);background:#fff8e1;font-size:14px;display:none}
+.msg.on{display:block}
+.msg.bad{border-left-color:var(--danger);background:#fdeceb}
+.msg.ok{border-left-color:var(--green);background:#eaf5ea}
+.msg.wait{border-left-color:var(--navy);background:#eef4fa}
+
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin:0 2px 18px}
+.pill{padding:9px 15px;border:1px solid var(--navy);background:var(--white);color:var(--navy);font-size:14px;text-transform:uppercase;cursor:pointer;border-radius:3px}
+.pill.on{background:var(--navy);color:var(--white)}
+.pill span{font-family:'Roboto',sans-serif;font-size:12px;opacity:.75;margin-left:6px}
+.pill:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.band{display:flex;align-items:center;gap:10px;margin:22px 2px 12px}
+.band .lvl{background:var(--navy);color:var(--white);padding:5px 12px;font-size:14px;text-transform:uppercase}
+.band hr{flex:1;border:0;border-top:2px solid var(--gold);margin:0}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;padding:0 2px}
+.fac{background:var(--white);border:2px solid var(--navy);outline:1px solid var(--navy);outline-offset:3px;display:flex;flex-direction:column}
+.fac .top{background:var(--navy);color:var(--white);padding:9px 11px}
+.fac .top .nm{font-family:'Oswald',Arial,sans-serif;font-size:16px;text-transform:uppercase;line-height:1.2}
+.fac .top .sub{font-size:12px;color:#bcd2e8}
+.fac .body{padding:10px 11px 12px;flex:1 1 auto}
+.fac dl{margin:0;font-size:13.5px}
+.fac dl div{display:flex;gap:8px;padding:2px 0;border-bottom:1px dotted var(--line)}
+.fac dt{flex:0 0 92px;color:var(--muted);text-transform:uppercase;font-size:11px;letter-spacing:.5px;padding-top:2px}
+.fac dd{margin:0;flex:1 1 auto;word-break:break-word}
+.fac .acts{padding:0 11px 11px;display:flex;gap:8px;flex-wrap:wrap}
+
+.badge{display:inline-block;padding:2px 8px;font-size:12px;text-transform:uppercase;border-radius:2px;background:var(--line);color:var(--ink)}
+.badge.ok{background:#eaf5ea;color:#1b5e20;border:1px solid #9ccc9e}
+.badge.wait{background:#fff8e1;color:#7a5900;border:1px solid #e8c766}
+.badge.bad{background:#fdeceb;color:#8f1e17;border:1px solid #e3a9a4}
+.badge.dhis{background:#eef4fa;color:var(--navy);border:1px solid #a9c4dd}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{background:var(--navy);color:var(--white);font-family:'Oswald',Arial,sans-serif;text-transform:uppercase;font-size:12.5px;letter-spacing:.5px;font-weight:500}
+tr:nth-child(even) td{background:#f7f9fb}
+.tablewrap{overflow-x:auto;margin:0 2px}
+
+.reqcard{border:2px solid var(--navy);outline:1px solid var(--navy);outline-offset:3px;background:var(--white);margin:6px 2px 20px;padding:13px}
+.reqcard .rh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-bottom:2px solid var(--gold);padding-bottom:8px;margin-bottom:10px}
+.reqcard .rh b{font-family:'Oswald',Arial,sans-serif;text-transform:uppercase;color:var(--navy);font-size:16px}
+.reqcard .meta{font-size:12px;color:var(--muted)}
+
+.stafflist{margin:0 0 12px}
+.staffrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-left:4px solid var(--navy);padding:8px 10px;margin-bottom:8px;background:#fbfcfd}
+.staffrow .who{flex:1 1 200px;min-width:0}
+.staffrow .who b{font-size:14.5px}
+.staffrow .who small{display:block;color:var(--muted);font-size:12px}
+.staffrow.out{border-left-color:var(--danger);background:#fdeceb}
+.staffrow.new{border-left-color:var(--green);background:#eaf5ea}
+
+.newstaff{border:1px dashed var(--line);padding:10px;margin-bottom:10px;background:#fbfcfd}
+.newstaff .row .field{margin-bottom:8px}
+
+.modal{position:fixed;inset:0;background:rgba(0,20,45,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal.on{display:flex}
+.modal .box{background:var(--white);border:3px solid var(--navy);max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:16px}
+.modal .box h2{margin:0 0 12px;font-size:17px;text-transform:uppercase;color:var(--navy);border-bottom:2px solid var(--gold);padding-bottom:7px}
+
+.log{background:#12181f;color:#b6f7c1;padding:11px 12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.5;max-height:190px;overflow:auto;margin-top:12px}
+.log .line{padding:1px 0;border-bottom:1px solid #1f2933;word-break:break-word}
+.log .err{color:#ff8b82;display:block}
+.log .ok{color:#7ee08a}
+.log .warn{color:#ffd76a}
+.log .info{color:#8ec6ff}
+
+.foot{max-width:1080px;margin:0 auto;padding:6px 18px;color:var(--muted);font-size:12px;text-align:center}
+.count{font-size:13px;color:var(--muted);margin:0 2px 10px}
+
+@media (max-width:640px){
+  header{padding:10px 12px}
+  header h1{font-size:18px}
+  .brandbar .logo{height:40px;padding:4px}
+  .wrap{padding:12px}
+  .card{padding:12px}
+  .grid{grid-template-columns:1fr}
+  .tab{font-size:13.5px;padding:11px 8px}
+  .fac dt{flex:0 0 78px}
+}
+@media (max-width:360px){body{font-size:14px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandbar">
+    <img class="logo" src="NMCP.png" alt="National Malaria Control Programme" onerror="this.style.display='none'">
+    <div class="brandtext">
+      <h1>Health Facility Register</h1>
+      <p>Facilities, staff, transfers and DHIS2 org units</p>
+    </div>
+    <img class="logo" src="ICF-SL.jpg" alt="Informatics Consultancy Firm Sierra Leone" onerror="this.style.display='none'">
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab on" id="tabNew"  onclick="show('new')">Add facility</button>
+  <button class="tab"    id="tabReg"  onclick="show('reg')">Register</button>
+  <button class="tab"    id="tabBulk" onclick="show('bulk')">Bulk upload</button>
+  <button class="tab"    id="tabAdm"  onclick="show('adm')">Admin</button>
+</nav>
+
+<div class="wrap">
+  <div class="msg" id="msg"></div>
+
+  <!-- ================= ADD FACILITY ================= -->
+  <section class="panel on" id="panelNew">
+    <div class="card">
+      <h2>New facility details</h2>
+      <p class="hint" style="margin-top:-6px">A new facility is submitted for review. The admin accepts or rejects it, and an accepted facility can be pushed to DHIS2 as an org unit.</p>
+
+      <div class="row">
+        <div class="field">
+          <label for="nDistrict">District <span class="req">*</span></label>
+          <select id="nDistrict" onchange="fillChiefdoms()"></select>
+          <div class="err" id="eDistrict"></div>
+        </div>
+        <div class="field">
+          <label for="nChiefdom">Chiefdom <span class="req">*</span></label>
+          <select id="nChiefdom" onchange="toggleChiefdomOther()"><option value="">Choose a district first</option></select>
+          <input id="nChiefdomOther" style="margin-top:8px;display:none" autocomplete="off" placeholder="Type the chiefdom name">
+          <div class="err" id="eChiefdom"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="nPhu">PHU / facility name <span class="req">*</span></label>
+          <input id="nPhu" autocomplete="off" placeholder="Facility name">
+          <div class="err" id="ePhu"></div>
+        </div>
+        <div class="field">
+          <label for="nType">Facility type <span class="req">*</span></label>
+          <select id="nType"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="nOwner">Ownership</label>
+          <select id="nOwner"></select>
+        </div>
+        <div class="field">
+          <label for="nOpened">Opening date <span class="req">*</span></label>
+          <input id="nOpened" type="date">
+          <div class="hint">Used as the DHIS2 opening date.</div>
+        </div>
+      </div>
+
+      <h3>In-charge</h3>
+      <div class="row">
+        <div class="field">
+          <label for="nIncName">Name of in-charge <span class="req">*</span></label>
+          <input id="nIncName" autocomplete="off">
+          <div class="err" id="eIncName"></div>
+        </div>
+        <div class="field">
+          <label for="nIncPhone">In-charge telephone <span class="req">*</span></label>
+          <input id="nIncPhone" inputmode="numeric" maxlength="9" placeholder="9 digits">
+          <div class="err" id="eIncPhone"></div>
+        </div>
+      </div>
+
+      <h3>Staff</h3>
+      <div class="row">
+        <div class="field" style="flex:0 0 180px">
+          <label for="nCount">Number of staff <span class="req">*</span></label>
+          <input id="nCount" type="number" min="1" max="60" value="1" oninput="buildStaffRows()">
+          <div class="err" id="eCount"></div>
+        </div>
+      </div>
+      <div class="hint" style="margin:-6px 0 12px">Every member listed must have a name, a telephone and a cadre.</div>
+      <div id="nStaffRows"></div>
+
+      <h3>Submitted by</h3>
+      <div class="row">
+        <div class="field">
+          <label for="nByName">Your name <span class="req">*</span></label>
+          <input id="nByName" autocomplete="off">
+          <div class="err" id="eByName"></div>
+        </div>
+        <div class="field">
+          <label for="nByPhone">Your telephone <span class="req">*</span></label>
+          <input id="nByPhone" inputmode="numeric" maxlength="9" placeholder="9 digits">
+          <div class="err" id="eByPhone"></div>
+        </div>
+      </div>
+
+      <div class="form-foot">
+        <button class="btn" id="btnNewSubmit" onclick="submitNewFacility()">Submit for review</button>
+        <button class="btn ghost" onclick="resetNewFacility()">Clear form</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REGISTER ================= -->
+  <section class="panel" id="panelReg">
+    <div class="card">
+      <h2>Find a facility</h2>
+      <div class="row">
+        <div class="field">
+          <label for="fSearch">Search</label>
+          <input id="fSearch" placeholder="PHU, chiefdom, in-charge or staff name" oninput="renderRegister()">
+        </div>
+        <div class="field">
+          <label for="fDistrict">District</label>
+          <select id="fDistrict" onchange="fillFilterChiefdoms()"></select>
+        </div>
+        <div class="field">
+          <label for="fChiefdom">Chiefdom</label>
+          <select id="fChiefdom" onchange="renderRegister()"><option value="">All chiefdoms</option></select>
+        </div>
+        <div class="field">
+          <label for="fStatus">Status</label>
+          <select id="fStatus" onchange="renderRegister()">
+            <option value="">All</option>
+            <option value="Active">Active</option>
+            <option value="Pending">Pending review</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-foot">
+        <button class="btn ghost" onclick="pullAll(true)">Refresh from server</button>
+        <button class="btn ghost" onclick="exportRegisterCsv()">Download register CSV</button>
+      </div>
+    </div>
+
+    <div class="count" id="regCount"></div>
+    <div class="grid" id="regGrid"></div>
+  </section>
+
+  <!-- ================= BULK UPLOAD ================= -->
+  <section class="panel" id="panelBulk">
+    <div class="card">
+      <h2>Bulk upload facilities</h2>
+      <p class="hint" style="margin-top:-6px">Excel or CSV. Columns: District, Chiefdom, PHU, Number of Staff, Staff Names, Telephones, Cadres, In-charge Name, In-charge Telephone, Status. Several members go in one cell separated by a semicolon, or put one row per member and repeat the PHU.</p>
+      <div class="row">
+        <div class="field">
+          <label for="bulkFile">Choose file</label>
+          <input id="bulkFile" type="file" accept=".xlsx,.xls,.csv" onchange="readBulk(this.files[0])">
+        </div>
+      </div>
+      <div class="form-foot">
+        <button class="btn ghost" onclick="downloadTemplate()">Download template</button>
+        <button class="btn gold" id="btnBulkSend" onclick="sendBulk()" style="display:none">Upload facilities</button>
+      </div>
+    </div>
+    <div id="bulkPreview"></div>
+  </section>
+
+  <!-- ================= ADMIN ================= -->
+  <section class="panel" id="panelAdm">
+    <div class="card" id="admLogin">
+      <h2>Admin sign in</h2>
+      <div class="row">
+        <div class="field" style="flex:1 1 260px">
+          <label for="admPass">Password</label>
+          <input id="admPass" type="password" onkeydown="if(event.key==='Enter')adminLogin()">
+          <div class="err" id="eAdmPass"></div>
+        </div>
+      </div>
+      <div class="form-foot"><button class="btn" onclick="adminLogin()">Sign in</button></div>
+    </div>
+
+    <div id="admArea" style="display:none">
+      <div class="pills" id="admPills">
+        <button class="pill on" id="pillReq"  onclick="admShow('req')">Review requests <span id="cReq">0</span></button>
+        <button class="pill"    id="pillMove" onclick="admShow('move')">Transfer staff</button>
+        <button class="pill"    id="pillHist" onclick="admShow('hist')">Transfer history</button>
+        <button class="pill"    id="pillD2"   onclick="admShow('d2')">DHIS2 settings</button>
+        <button class="pill"    id="pillOut"  onclick="adminLogout()">Sign out</button>
+      </div>
+
+      <!-- requests -->
+      <div id="admReq">
+        <div class="band"><span class="lvl">Waiting for a decision</span><hr></div>
+        <div id="reqPending"></div>
+        <div class="band"><span class="lvl">Decided</span><hr></div>
+        <div id="reqDone"></div>
+      </div>
+
+      <!-- transfer -->
+      <div id="admMove" style="display:none">
+        <div class="card">
+          <h2>Move a member to another PHU</h2>
+          <div class="band"><span class="lvl">Moving from</span><hr></div>
+          <div class="row">
+            <div class="field">
+              <label for="mvFromD">District</label>
+              <select id="mvFromD" onchange="fillMoveSide('From')"></select>
+            </div>
+            <div class="field">
+              <label for="mvFromC">Chiefdom</label>
+              <select id="mvFromC" onchange="fillMoveSide('From')"></select>
+            </div>
+            <div class="field">
+              <label for="mvFrom">Facility</label>
+              <select id="mvFrom" onchange="fillMoveStaff()"></select>
+            </div>
+            <div class="field">
+              <label for="mvStaff">Member</label>
+              <select id="mvStaff"></select>
+            </div>
+          </div>
+
+          <div class="band"><span class="lvl">Moving to</span><hr></div>
+          <div class="row">
+            <div class="field">
+              <label for="mvToD">District</label>
+              <select id="mvToD" onchange="fillMoveSide('To')"></select>
+            </div>
+            <div class="field">
+              <label for="mvToC">Chiefdom</label>
+              <select id="mvToC" onchange="fillMoveSide('To')"></select>
+            </div>
+            <div class="field">
+              <label for="mvTo">Facility</label>
+              <select id="mvTo"></select>
+            </div>
+            <div class="field">
+              <label for="mvDate">Effective date</label>
+              <input id="mvDate" type="date">
+            </div>
+          </div>
+          <div class="field">
+            <label for="mvReason">Reason</label>
+            <input id="mvReason" placeholder="Posting, redeployment, request">
+          </div>
+          <div class="err" id="eMove"></div>
+          <div class="form-foot"><button class="btn" id="btnMove" onclick="doTransfer()">Move member</button></div>
+        </div>
+      </div>
+
+      <!-- history -->
+      <div id="admHist" style="display:none">
+        <div class="card">
+          <h2>All transfers</h2>
+          <div class="row">
+            <div class="field">
+              <label for="hSearch">Search</label>
+              <input id="hSearch" placeholder="Name, PHU or district" oninput="renderHistory()">
+            </div>
+          </div>
+          <div class="form-foot"><button class="btn ghost" onclick="exportTransfersCsv()">Download transfers CSV</button></div>
+        </div>
+        <div class="tablewrap" id="histTable"></div>
+      </div>
+
+      <!-- dhis2 -->
+      <div id="admD2" style="display:none">
+        <div class="card">
+          <h2>DHIS2 connection</h2>
+          <div class="field">
+            <label for="d2Url">DHIS2 base URL</label>
+            <input id="d2Url" placeholder="https://hmis.moh.gov.sl/hmis">
+            <div class="hint">The part before /api, with no trailing slash.</div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="d2User">Username</label>
+              <input id="d2User" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="d2Pass">Password</label>
+              <input id="d2Pass" type="password" autocomplete="new-password" placeholder="Leave blank to keep the saved one">
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="d2Level">Facility org unit level</label>
+              <select id="d2Level" onchange="readD2Form()">
+                <option value="2">Level 2</option>
+                <option value="3">Level 3</option>
+                <option value="4">Level 4</option>
+                <option value="5" selected>Level 5</option>
+                <option value="6">Level 6</option>
+              </select>
+              <div class="hint">Test connection names each level as the server has it.</div>
+            </div>
+            <div class="field">
+              <label for="d2ParentShow">Parent level</label>
+              <input id="d2ParentShow" value="Level 4" readonly tabindex="-1" style="background:#eef1f5;color:var(--navy);font-weight:700">
+              <div class="hint">Set on its own, always one above the facility.</div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="d2Sets">Data sets to assign to every new facility</label>
+            <select id="d2Sets" multiple onchange="readD2Form()"></select>
+            <div class="hint">Hold Ctrl or Cmd to pick several. Load them from the server first.</div>
+          </div>
+          <div class="err" id="eD2"></div>
+          <div class="form-foot">
+            <button class="btn ghost" id="btnD2Test" onclick="dhis2Test()">Test connection</button>
+            <button class="btn ghost" id="btnD2Sets" onclick="dhis2LoadSets()">Load data sets</button>
+            <button class="btn" id="btnD2Save" onclick="dhis2Save()">Save settings</button>
+          </div>
+          <div class="msg" id="d2Msg"></div>
+          <div class="log" id="d2Log"><div class="line info">Ready.</div></div>
+        </div>
+
+        <div class="card">
+          <h2>Facilities not yet in DHIS2</h2>
+          <div id="d2Queue"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="foot">Informatics Consultancy Firm Sierra Leone for the National Malaria Control Programme</div>
+
+<!-- staff update modal -->
+<div class="modal" id="updModal">
+  <div class="box">
+    <h2 id="updTitle">Update facility staff</h2>
+    <div class="msg" id="updMsg"></div>
+    <div id="updBody"></div>
+    <div class="form-foot" style="margin-top:14px">
+      <button class="btn" id="btnUpdSend" onclick="submitStaffChanges()">Send changes for review</button>
+      <button class="btn ghost" onclick="closeUpdate()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- parent org unit picker -->
+<div class="modal" id="pickModal">
+  <div class="box">
+    <h2>Match the chiefdom in DHIS2</h2>
+    <p class="hint" id="pickHint" style="margin-top:-6px"></p>
+    <div class="field">
+      <label for="pickSearch">Search the org units</label>
+      <input id="pickSearch" autocomplete="off" oninput="renderPickList()" placeholder="Type part of the name">
+    </div>
+    <div id="pickList" class="stafflist" style="max-height:320px;overflow:auto"></div>
+    <div class="form-foot">
+      <button class="btn ghost" onclick="pickCancel()">Cancel this facility</button>
+    </div>
+  </div>
+</div>
+
+<!-- decision modal -->
+<div class="modal" id="decModal">
+  <div class="box">
+    <h2 id="decTitle">Reject request</h2>
+    <div class="field">
+      <label for="decReason">Reason</label>
+      <textarea id="decReason" placeholder="Tell the PHU why"></textarea>
+      <div class="err" id="eDec"></div>
+    </div>
+    <div class="form-foot">
+      <button class="btn red" id="btnDecGo" onclick="confirmDecision()">Reject</button>
+      <button class="btn ghost" onclick="closeModal('decModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   Paste the Apps Script web app /exec URL from HealthFacilityRegister.gs.
+   Leave it blank and the app keeps everything on this device only.
+   ============================================================ */
+var SCRIPT_URL = '';
+var ADMIN_PASSWORD = 'admin12345';
+
+/* DHIS2 is called straight from this page. A direct call is tried first, and if
+   the server blocks it on CORS the same call goes through the ICF Apps Script
+   proxy, the one already in use by ICF Collect. */
+var PROXIES = [
+  { name: 'Direct',    type: 'direct', url: '' },
+  { name: 'ICF proxy', type: 'gas',    url: 'https://script.google.com/macros/s/AKfycbwC9lJdYj4askujDNO2GfK-Rqq02VBcr90NXhifgvpawboEK1YCyUfbi2GA2hFL2UghkA/exec' }
+];
+
+var DISTRICTS = ['Bo','Bombali','Bonthe','Falaba','Kailahun','Kambia','Karene','Kenema','Koinadugu','Kono','Moyamba','Port Loko','Pujehun','Tonkolili','Western Area Rural','Western Area Urban'];
+var TYPES = ['CHC','CHP','MCHP','District Hospital','Regional Hospital','Clinic','Private Facility'];
+var OWNERS = ['Government','Mission','Private','NGO','Military or Police'];
+/* Starting chiefdom list per district. Drop a facilities.csv beside this page with
+   District and Chiefdom columns and the names in that file are used instead. */
+var CHIEFDOMS = {
+  'Bo': ['Badjia','Bagbe','Bagbwe','Baoma','Bumpe Ngao','Gbo','Jaiama Bongor','Kakua','Komboya','Lugbu','Niawa Lenga','Selenga','Tikonko','Valunia','Wonde'],
+  'Bombali': ['Biriwa','Bombali Sebora','Bombali Siari','Gbanti Kamaranka','Gbendembu Ngowahun','Magbaiamba Ndowahun','Makari Gbanti','Mara','Ngowahun','Paki Masabong','Safroko Limba','Sanda Tendaren'],
+  'Bonthe': ['Bendu Cha','Bum','Dema','Imperri','Jong','Kpanda Kemoh','Kwamebai Krim','Nongoba Bullom','Sittia','Sogbini','Yawbeko','Bonthe Urban'],
+  'Falaba': ['Delemandugu','Dembelia Sinkunia','Folosaba Dembelia','Kulor Saradu','Mongo','Morifindugu','Neya','Nieni','Sulima'],
+  'Kailahun': ['Dea','Jawei','Kissi Kama','Kissi Teng','Kissi Tongi','Luawa','Malema','Mandu','Njaluahun','Peje Bongre','Peje West','Penguia','Upper Bambara','Yawei'],
+  'Kambia': ['Bramaia','Gbinleh Dixing','Magbema','Mambolo','Masungbala','Samu','Tonko Limba'],
+  'Karene': ['Buya Romende','Dibia','Gbanti','Libeisaygahun','Sanda Loko','Sanda Magbolonthor','Sella Limba','Tambakha Simibungie','Tambakha Yobangie'],
+  'Kenema': ['Dama','Dodo','Gaura','Gorama Mende','Kandu Leppiama','Koya','Langrama','Lower Bambara','Malegohun','Niawa','Nomo','Nongowa','Simbaru','Small Bo','Tunkia','Wandor'],
+  'Koinadugu': ['Diang','Kasonko','Sengbe','Wara Wara Bafodia','Wara Wara Yagala'],
+  'Kono': ['Fiama','Gbane','Gbane Kandor','Gbense','Gorama Kono','Kamara','Lei','Mafindor','Nimikoro','Nimiyama','Sandor','Soa','Tankoro','Toli'],
+  'Moyamba': ['Bagruwa','Bumpeh','Dasse','Fakunya','Kagboro','Kaiyamba','Kamaje','Kongbora','Kori','Kowa','Lower Banta','Ribbi','Timdale','Upper Banta'],
+  'Port Loko': ['Bureh Kasseh Maconteh','Kaffu Bullom','Koya','Lokomasama','Maforki','Marampa','Masimera','Tinkatupa Makama Safroko'],
+  'Pujehun': ['Barri','Galliness Perri','Kpaka','Kpanga Kabonde','Kpanga Krim','Makpele','Malen','Mano Sakrim','Peje','Soro Gbema','Sorogbema','Yakemu Kpukumu Krim'],
+  'Tonkolili': ['Gbonkolenken','Kafe Simiria','Kalansogoia','Kholifa Mabang','Kholifa Rowalla','Kunike','Kunike Barina','Malal Mara','Sambaia','Tane','Yoni'],
+  'Western Area Rural': ['Koya Rural','Mountain Rural','Waterloo Rural','York Rural'],
+  'Western Area Urban': ['Central I','Central II','East I','East II','East III','West I','West II','West III']
+};
+var OTHER = '__other';
+var csvChiefdoms = {};
+
+var CADRES = ['CHO','CHA','SECHN','SRN','MCH Aide','Nurse Aide','Midwife','Laboratory Technician','Laboratory Assistant','Pharmacy Technician','Data Officer','Vaccinator','Cleaner','Security','Driver','Other'];
+
+var KEY = 'icf_hfr_v1';
+var facilities = [], staff = [], requests = [], transfers = [];
+var D2KEY = 'icf_hfr_dhis2';
+var d2 = { url:'', user:'', pass:'', level:5, parentLevel:4, datasets:[], allSets:[], parentMap:{} };
+var isAdmin = false, pulled = false, openFacilityId = '', pendingDecision = null;
+var bulkRows = [];
+
+/* ---------- small helpers ---------- */
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+  return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+function uid(p){ return (p||'R') + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function today(){ var d = new Date(); return d.toISOString().slice(0,10); }
+function stamp(){ return new Date().toISOString(); }
+function nice(iso){ if(!iso) return ''; var d = new Date(iso); return isNaN(d) ? String(iso) : d.toLocaleString(); }
+function niceDay(iso){ if(!iso) return ''; var d = new Date(iso); return isNaN(d) ? String(iso) : d.toLocaleDateString(); }
+function phoneOk(v){ return /^[0-9]{9}$/.test(String(v||'').trim()); }
+function titleCase(s){ return String(s||'').trim().replace(/\s+/g,' ').replace(/\b[a-z]/g, function(c){ return c.toUpperCase(); }); }
+
+function note(text, kind){
+  var m = document.getElementById('msg');
+  m.textContent = text;
+  m.className = 'msg on' + (kind ? ' ' + kind : '');
+  window.scrollTo(0,0);
+  if (kind === 'ok') setTimeout(function(){ m.className = 'msg'; }, 5000);
+}
+function boxNote(id, text, kind){
+  var m = document.getElementById(id);
+  if (!m) return;
+  m.textContent = text;
+  m.className = 'msg on' + (kind ? ' ' + kind : '');
+}
+function fieldErr(inputId, boxId, text){
+  var i = document.getElementById(inputId), b = document.getElementById(boxId);
+  if (!i || !b) return;
+  if (text){ b.textContent = text; b.className = 'err on'; i.classList.add('bad'); }
+  else { b.textContent = ''; b.className = 'err'; i.classList.remove('bad'); }
+}
+function busy(id, on){
+  var b = document.getElementById(id);
+  if (b) b.classList.toggle('busy', !!on);
+  if (b) b.disabled = !!on;
+}
+function options(list, sel){
+  return list.map(function(o){
+    var v = (typeof o === 'string') ? o : o.id, t = (typeof o === 'string') ? o : o.name;
+    return '<option value="' + esc(v) + '"' + (v === sel ? ' selected' : '') + '>' + esc(t) + '</option>';
+  }).join('');
+}
+
+/* ---------- storage ---------- */
+function loadLocal(){
+  try{
+    var raw = window.localStorage.getItem(KEY);
+    if (!raw) return;
+    var d = JSON.parse(raw);
+    facilities = d.facilities || []; staff = d.staff || [];
+    requests = d.requests || []; transfers = d.transfers || [];
+  } catch(e){}
+  try{
+    var raw2 = window.localStorage.getItem(D2KEY);
+    if (raw2) d2 = Object.assign(d2, JSON.parse(raw2));
+  } catch(e){}
+}
+function saveLocal(){
+  try{ window.localStorage.setItem(KEY, JSON.stringify({
+    facilities: facilities, staff: staff, requests: requests, transfers: transfers
+  })); } catch(e){}
+}
+function saveD2(){
+  try{ window.localStorage.setItem(D2KEY, JSON.stringify(d2)); } catch(e){}
+}
+
+/* ---------- server ---------- */
+function api(action, payload){
+  if (!SCRIPT_URL) return Promise.resolve({ ok:true, local:true });
+  var body = JSON.stringify(Object.assign({ action: action }, payload || {}));
+  return fetch(SCRIPT_URL, { method:'POST', body: body })
+    .then(function(r){ return r.json(); })
+    .catch(function(e){ return { ok:false, error:'Network problem, the server was not reached' }; });
+}
+function pullAll(loud){
+  if (!SCRIPT_URL){ if (loud) note('No server URL is set, records are held on this device only.', 'wait'); paintAll(); return Promise.resolve(); }
+  if (loud) note('Reading the register from the server.', 'wait');
+  return fetch(SCRIPT_URL + '?action=all&t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d || !d.ok) throw new Error(d && d.error ? d.error : 'bad reply');
+      facilities = d.facilities || []; staff = d.staff || [];
+      requests = d.requests || []; transfers = d.transfers || [];
+      if (d.config){
+        d2.url = d.config.url || d2.url;
+        d2.user = d.config.user || d2.user;
+        d2.level = d.config.level || d2.level;
+        d2.parentLevel = d2.level - 1;
+        if ((d.config.datasets || []).length) d2.datasets = d.config.datasets;
+      }
+      pulled = true; saveLocal(); paintAll();
+      if (loud) note('Register updated, ' + facilities.length + ' facilities on file.', 'ok');
+    })
+    .catch(function(e){
+      paintAll();
+      note('The server could not be read. Showing the last copy held on this device.', 'bad');
+    });
+}
+
+/* ---------- tabs ---------- */
+function show(which){
+  var p = { 'new':'panelNew', reg:'panelReg', bulk:'panelBulk', adm:'panelAdm' };
+  var t = { 'new':'tabNew', reg:'tabReg', bulk:'tabBulk', adm:'tabAdm' };
+  for (var k in p){
+    document.getElementById(p[k]).classList.toggle('on', k === which);
+    document.getElementById(t[k]).classList.toggle('on', k === which);
+  }
+  if (which === 'reg') renderRegister();
+  if (which === 'adm') renderAdmin();
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   ADD FACILITY
+   ============================================================ */
+function buildStaffRows(){
+  var n = parseInt(document.getElementById('nCount').value, 10);
+  if (isNaN(n) || n < 1) n = 1;
+  if (n > 60) { n = 60; document.getElementById('nCount').value = 60; }
+  var box = document.getElementById('nStaffRows');
+  var old = [];
+  for (var k = 0; k < 60; k++){
+    var nm = document.getElementById('sName' + k);
+    if (nm) old.push({ name: nm.value, phone: document.getElementById('sPhone' + k).value, cadre: document.getElementById('sCadre' + k).value });
+  }
+  var h = '';
+  for (var i = 0; i < n; i++){
+    var o = old[i] || { name:'', phone:'', cadre:'' };
+    h += '<div class="newstaff">'
+      +  '<label style="margin-bottom:8px">Member ' + (i+1) + '</label>'
+      +  '<div class="row">'
+      +    '<div class="field"><label for="sName' + i + '">Name <span class="req">*</span></label>'
+      +      '<input id="sName' + i + '" value="' + esc(o.name) + '" autocomplete="off"><div class="err" id="eName' + i + '"></div></div>'
+      +    '<div class="field"><label for="sPhone' + i + '">Telephone <span class="req">*</span></label>'
+      +      '<input id="sPhone' + i + '" inputmode="numeric" maxlength="9" placeholder="9 digits" value="' + esc(o.phone) + '"><div class="err" id="ePhone' + i + '"></div></div>'
+      +    '<div class="field"><label for="sCadre' + i + '">Cadre <span class="req">*</span></label>'
+      +      '<select id="sCadre' + i + '"><option value="">Select cadre</option>' + options(CADRES, o.cadre) + '</select>'
+      +      '<div class="err" id="eCadre' + i + '"></div></div>'
+      +  '</div></div>';
+  }
+  box.innerHTML = h;
+}
+
+function collectNewStaff(){
+  var n = parseInt(document.getElementById('nCount').value, 10) || 0;
+  var out = [], bad = false;
+  for (var i = 0; i < n; i++){
+    var name = titleCase(document.getElementById('sName' + i).value);
+    var phone = String(document.getElementById('sPhone' + i).value || '').replace(/\D/g,'');
+    var cadre = document.getElementById('sCadre' + i).value;
+    fieldErr('sName' + i, 'eName' + i, name ? '' : 'Enter the name');
+    fieldErr('sPhone' + i, 'ePhone' + i, phoneOk(phone) ? '' : 'Wrong entry, 9 digits');
+    fieldErr('sCadre' + i, 'eCadre' + i, cadre ? '' : 'Choose a cadre');
+    if (!name || !phoneOk(phone) || !cadre) bad = true;
+    out.push({ name:name, phone:phone, cadre:cadre });
+  }
+  return bad ? null : out;
+}
+
+function submitNewFacility(){
+  var district = document.getElementById('nDistrict').value;
+  var chiefdom = newChiefdomValue();
+  var phu = titleCase(document.getElementById('nPhu').value);
+  var type = document.getElementById('nType').value;
+  var owner = document.getElementById('nOwner').value;
+  var opened = document.getElementById('nOpened').value;
+  var incName = titleCase(document.getElementById('nIncName').value);
+  var incPhone = String(document.getElementById('nIncPhone').value || '').replace(/\D/g,'');
+  var byName = titleCase(document.getElementById('nByName').value);
+  var byPhone = String(document.getElementById('nByPhone').value || '').replace(/\D/g,'');
+
+  fieldErr('nDistrict','eDistrict', district ? '' : 'Choose a district');
+  fieldErr('nChiefdom','eChiefdom', chiefdom ? '' : 'Enter the chiefdom');
+  fieldErr('nPhu','ePhu', phu ? '' : 'Enter the facility name');
+  fieldErr('nIncName','eIncName', incName ? '' : 'Enter the name of the in-charge');
+  fieldErr('nIncPhone','eIncPhone', phoneOk(incPhone) ? '' : 'Wrong entry, 9 digits');
+  fieldErr('nByName','eByName', byName ? '' : 'Enter your name');
+  fieldErr('nByPhone','eByPhone', phoneOk(byPhone) ? '' : 'Wrong entry, 9 digits');
+
+  var members = collectNewStaff();
+  if (!district || !chiefdom || !phu || !incName || !phoneOk(incPhone) || !byName || !phoneOk(byPhone) || !members){
+    note('Some entries are missing or wrong. The fields in red need attention.', 'bad');
+    return;
+  }
+  var clash = facilities.filter(function(f){
+    return f.status !== 'Rejected' && f.district === district
+      && String(f.chiefdom).toLowerCase() === chiefdom.toLowerCase()
+      && String(f.phu).toLowerCase() === phu.toLowerCase();
+  });
+  if (clash.length){ note('That facility is already on the register for ' + chiefdom + ', ' + district + '.', 'bad'); return; }
+
+  var fid = uid('F');
+  var fac = {
+    id: fid, district: district, chiefdom: chiefdom, phu: phu, type: type, owner: owner,
+    opened: opened || today(), inchargeName: incName, inchargePhone: incPhone,
+    status: 'Pending', dhis2Id: '', dhis2At: '', createdAt: stamp(), createdBy: byName, createdByPhone: byPhone
+  };
+  var rows = members.map(function(m){
+    return { id: uid('S'), facilityId: fid, name: m.name, phone: m.phone, cadre: m.cadre,
+             status: 'Pending add', addedAt: stamp() };
+  });
+  var req = {
+    id: uid('Q'), type: 'NEW_FACILITY', facilityId: fid, facilityName: phu,
+    district: district, chiefdom: chiefdom, staffIds: rows.map(function(r){ return r.id; }).join(','),
+    detail: members.length + ' members, in-charge ' + incName + ' on ' + incPhone,
+    by: byName, byPhone: byPhone, at: stamp(), status: 'Pending', decidedBy: '', decidedAt: '', reason: ''
+  };
+
+  facilities.push(fac);
+  rows.forEach(function(r){ staff.push(r); });
+  requests.push(req);
+  saveLocal();
+
+  busy('btnNewSubmit', true);
+  api('newFacility', { facility: fac, staff: rows, request: req }).then(function(res){
+    busy('btnNewSubmit', false);
+    if (res && res.ok){
+      note('Facility submitted. It sits with the admin for review.', 'ok');
+      resetNewFacility();
+      paintAll();
+    } else {
+      note('Held on this device, the server did not confirm: ' + (res && res.error ? res.error : 'unknown'), 'bad');
+    }
+  });
+}
+
+function resetNewFacility(){
+  ['nPhu','nIncName','nIncPhone','nByName','nByPhone','nChiefdomOther'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.getElementById('nDistrict').value = '';
+  fillChiefdoms();
+  document.getElementById('nCount').value = 1;
+  document.getElementById('nOpened').value = today();
+  buildStaffRows();
+  ['eDistrict','eChiefdom','ePhu','eIncName','eIncPhone','eByName','eByPhone'].forEach(function(id){
+    var b = document.getElementById(id); b.textContent=''; b.className='err';
+  });
+}
+
+/* ============================================================
+   REGISTER
+   ============================================================ */
+function facStaff(fid, all){
+  return staff.filter(function(s){
+    return s.facilityId === fid && (all ? true : (s.status === 'Active' || s.status === 'Pending add' || s.status === 'Pending removal'));
+  });
+}
+function facById(id){ for (var i=0;i<facilities.length;i++) if (facilities[i].id === id) return facilities[i]; return null; }
+function facLabel(f){ return f ? (f.phu + ' (' + f.chiefdom + ', ' + f.district + ')') : ''; }
+
+function renderRegister(){
+  var q = String(document.getElementById('fSearch').value || '').toLowerCase().trim();
+  var dz = document.getElementById('fDistrict').value;
+  var cd = document.getElementById('fChiefdom').value;
+  var st = document.getElementById('fStatus').value;
+  var list = facilities.filter(function(f){
+    if (dz && f.district !== dz) return false;
+    if (cd && f.chiefdom !== cd) return false;
+    if (st && f.status !== st) return false;
+    if (!q) return true;
+    var hay = [f.phu, f.chiefdom, f.district, f.inchargeName, f.type].join(' ').toLowerCase();
+    if (hay.indexOf(q) > -1) return true;
+    return facStaff(f.id).some(function(s){ return (s.name + ' ' + s.phone + ' ' + s.cadre).toLowerCase().indexOf(q) > -1; });
+  }).sort(function(a,b){
+    return (a.district + a.chiefdom + a.phu).localeCompare(b.district + b.chiefdom + b.phu);
+  });
+
+  document.getElementById('regCount').textContent = list.length + ' of ' + facilities.length + ' facilities';
+  var grid = document.getElementById('regGrid');
+  if (!list.length){
+    grid.innerHTML = '<div class="card" style="grid-column:1/-1"><p style="margin:0">No facility matches. Add one on the first tab, or upload a file on the bulk tab.</p></div>';
+    return;
+  }
+  grid.innerHTML = list.map(function(f){
+    var sl = facStaff(f.id);
+    var active = sl.filter(function(s){ return s.status === 'Active'; }).length;
+    var wait = sl.filter(function(s){ return s.status !== 'Active'; }).length;
+    var badge = f.status === 'Active' ? '<span class="badge ok">Active</span>'
+              : f.status === 'Pending' ? '<span class="badge wait">Pending review</span>'
+              : '<span class="badge bad">Rejected</span>';
+    var d2 = f.dhis2Id ? '<span class="badge dhis">DHIS2 ' + esc(f.dhis2Id) + '</span>' : '<span class="badge">Not in DHIS2</span>';
+    var moves = transfers.filter(function(t){ return t.fromId === f.id || t.toId === f.id; }).length;
+    return '<article class="fac">'
+      + '<div class="top"><div class="nm">' + esc(f.phu) + '</div><div class="sub">' + esc(f.chiefdom) + ', ' + esc(f.district) + '</div></div>'
+      + '<div class="body"><dl>'
+      +   '<div><dt>Type</dt><dd>' + esc(f.type || '') + (f.owner ? ', ' + esc(f.owner) : '') + '</dd></div>'
+      +   '<div><dt>In-charge</dt><dd>' + esc(f.inchargeName || '') + '<br>' + esc(f.inchargePhone || '') + '</dd></div>'
+      +   '<div><dt>Staff</dt><dd>' + active + ' on strength' + (wait ? ', ' + wait + ' awaiting review' : '') + '</dd></div>'
+      +   '<div><dt>Transfers</dt><dd>' + moves + '</dd></div>'
+      +   '<div><dt>Status</dt><dd>' + badge + ' ' + d2 + '</dd></div>'
+      + '</dl></div>'
+      + '<div class="acts">'
+      +   '<button class="btn sm" onclick="openUpdate(\'' + f.id + '\')">Update staff</button>'
+      +   '<button class="btn sm ghost" onclick="openUpdate(\'' + f.id + '\',1)">View staff</button>'
+      + '</div></article>';
+  }).join('');
+}
+
+function exportRegisterCsv(){
+  var head = ['District','Chiefdom','PHU','Type','Ownership','Number of Staff','Staff Names','Telephones','Cadres','In-charge Name','In-charge Telephone','Status','DHIS2 UID'];
+  var lines = [head.join(',')];
+  facilities.forEach(function(f){
+    var sl = facStaff(f.id).filter(function(s){ return s.status === 'Active'; });
+    lines.push([f.district, f.chiefdom, f.phu, f.type, f.owner, sl.length,
+      sl.map(function(s){ return s.name; }).join('; '),
+      sl.map(function(s){ return s.phone; }).join('; '),
+      sl.map(function(s){ return s.cadre; }).join('; '),
+      f.inchargeName, f.inchargePhone, f.status, f.dhis2Id || ''
+    ].map(csvCell).join(','));
+  });
+  downloadText('health_facility_register.csv', lines.join('\n'));
+}
+function csvCell(v){ var s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; }
+function downloadText(name, text){
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type:'text/csv;charset=utf-8' }));
+  a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+
+/* ============================================================
+   UPDATE FACILITY STAFF, sent for review
+   ============================================================ */
+var markedOut = {};      /* staffId -> true */
+var newMembers = [];     /* rows added in the modal */
+var viewOnly = false;
+
+function openUpdate(fid, readOnly){
+  openFacilityId = fid; markedOut = {}; newMembers = []; viewOnly = !!readOnly;
+  var f = facById(fid);
+  if (!f) return;
+  document.getElementById('updTitle').textContent = (viewOnly ? 'Staff at ' : 'Update staff at ') + f.phu;
+  boxNote('updMsg','','');
+  document.getElementById('updMsg').className = 'msg';
+  document.getElementById('btnUpdSend').style.display = viewOnly ? 'none' : 'inline-block';
+  renderUpdate();
+  document.getElementById('updModal').classList.add('on');
+}
+function closeUpdate(){ document.getElementById('updModal').classList.remove('on'); }
+function closeModal(id){ document.getElementById(id).classList.remove('on'); }
+
+function renderUpdate(){
+  var f = facById(openFacilityId);
+  var sl = facStaff(openFacilityId).sort(function(a,b){ return a.name.localeCompare(b.name); });
+  var h = '';
+
+  h += '<div class="hint" style="margin-bottom:10px">' + esc(f.chiefdom) + ', ' + esc(f.district)
+     + ' &middot; in-charge ' + esc(f.inchargeName) + ' on ' + esc(f.inchargePhone) + '</div>';
+
+  h += '<div class="stafflist">';
+  if (!sl.length) h += '<p class="hint">No member is on this facility yet.</p>';
+  sl.forEach(function(s){
+    var out = !!markedOut[s.id];
+    var tag = s.status === 'Active' ? '' : ' <span class="badge wait">' + esc(s.status) + '</span>';
+    h += '<div class="staffrow' + (out ? ' out' : '') + '">'
+      +  '<div class="who"><b>' + esc(s.name) + '</b>' + tag
+      +  '<small>' + esc(s.cadre) + ' &middot; ' + esc(s.phone) + '</small></div>';
+    if (!viewOnly && s.status === 'Active'){
+      h += out
+        ? '<button class="btn sm ghost" onclick="unmark(\'' + s.id + '\')">Keep</button>'
+        : '<button class="btn sm red" onclick="mark(\'' + s.id + '\')">Remove</button>';
+    }
+    h += '</div>';
+  });
+  h += '</div>';
+
+  if (!viewOnly){
+    h += '<h3 style="font-family:Oswald;color:#004080;text-transform:uppercase;font-size:15px;margin:14px 0 8px">New members</h3>';
+    if (!newMembers.length) h += '<p class="hint">Nothing added yet.</p>';
+    newMembers.forEach(function(m, i){
+      h += '<div class="staffrow new"><div class="who"><b>' + esc(m.name) + '</b>'
+        +  '<small>' + esc(m.cadre) + ' &middot; ' + esc(m.phone) + '</small></div>'
+        +  '<button class="btn sm ghost" onclick="dropNew(' + i + ')">Take off</button></div>';
+    });
+    h += '<div class="newstaff"><div class="row">'
+      +  '<div class="field"><label for="uName">Name</label><input id="uName" autocomplete="off"></div>'
+      +  '<div class="field"><label for="uPhone">Telephone</label><input id="uPhone" inputmode="numeric" maxlength="9" placeholder="9 digits"></div>'
+      +  '<div class="field"><label for="uCadre">Cadre</label><select id="uCadre"><option value="">Select cadre</option>' + options(CADRES) + '</select></div>'
+      +  '</div><div class="err" id="eUAdd"></div>'
+      +  '<button class="btn sm gold" onclick="addNewMember()">Add member</button></div>';
+
+    h += '<div class="row" style="margin-top:12px">'
+      +  '<div class="field"><label for="uBy">Your name</label><input id="uBy" autocomplete="off" value="' + esc(lastBy.name) + '"></div>'
+      +  '<div class="field"><label for="uByPhone">Your telephone</label><input id="uByPhone" inputmode="numeric" maxlength="9" value="' + esc(lastBy.phone) + '"></div>'
+      +  '</div><div class="err" id="eUBy"></div>';
+  }
+
+  var moves = transfers.filter(function(t){ return t.fromId === openFacilityId || t.toId === openFacilityId; })
+                       .sort(function(a,b){ return String(b.at).localeCompare(String(a.at)); });
+  if (moves.length){
+    h += '<h3 style="font-family:Oswald;color:#004080;text-transform:uppercase;font-size:15px;margin:16px 0 8px">Transfers</h3><div class="tablewrap"><table>'
+      +  '<tr><th>Date</th><th>Member</th><th>From</th><th>To</th></tr>'
+      +  moves.map(function(t){
+           return '<tr><td>' + esc(niceDay(t.date || t.at)) + '</td><td>' + esc(t.staffName) + '</td><td>' + esc(t.fromName) + '</td><td>' + esc(t.toName) + '</td></tr>';
+         }).join('') + '</table></div>';
+  }
+  document.getElementById('updBody').innerHTML = h;
+}
+
+var lastBy = { name:'', phone:'' };
+function mark(id){ markedOut[id] = true; renderUpdate(); }
+function unmark(id){ delete markedOut[id]; renderUpdate(); }
+function dropNew(i){ newMembers.splice(i,1); renderUpdate(); }
+
+function addNewMember(){
+  var name = titleCase(document.getElementById('uName').value);
+  var phone = String(document.getElementById('uPhone').value || '').replace(/\D/g,'');
+  var cadre = document.getElementById('uCadre').value;
+  var b = document.getElementById('eUAdd');
+  if (!name || !phoneOk(phone) || !cadre){
+    b.textContent = 'A name, a 9 digit telephone and a cadre are all needed.';
+    b.className = 'err on'; return;
+  }
+  newMembers.push({ name:name, phone:phone, cadre:cadre });
+  renderUpdate();
+}
+
+function submitStaffChanges(){
+  var outIds = Object.keys(markedOut);
+  if (!outIds.length && !newMembers.length){
+    boxNote('updMsg','Nothing has changed. Add a member or mark one for removal.','bad'); return;
+  }
+  var by = titleCase(document.getElementById('uBy').value);
+  var byPhone = String(document.getElementById('uByPhone').value || '').replace(/\D/g,'');
+  var eb = document.getElementById('eUBy');
+  if (!by || !phoneOk(byPhone)){
+    eb.textContent = 'Give your name and a 9 digit telephone.'; eb.className = 'err on'; return;
+  }
+  eb.className = 'err';
+  lastBy = { name: by, phone: byPhone };
+
+  var f = facById(openFacilityId);
+  var batch = uid('B');
+  var newStaffRows = [], newReqs = [];
+
+  newMembers.forEach(function(m){
+    var s = { id: uid('S'), facilityId: f.id, name: m.name, phone: m.phone, cadre: m.cadre, status:'Pending add', addedAt: stamp() };
+    newStaffRows.push(s);
+    newReqs.push({ id: uid('Q'), type:'ADD_STAFF', facilityId: f.id, facilityName: f.phu, district: f.district,
+      chiefdom: f.chiefdom, staffIds: s.id, detail: 'Add ' + m.name + ', ' + m.cadre + ', ' + m.phone,
+      by: by, byPhone: byPhone, at: stamp(), status:'Pending', decidedBy:'', decidedAt:'', reason:'', batch: batch });
+  });
+  outIds.forEach(function(id){
+    var s = null;
+    for (var i=0;i<staff.length;i++) if (staff[i].id === id) s = staff[i];
+    if (!s) return;
+    s.status = 'Pending removal';
+    newReqs.push({ id: uid('Q'), type:'REMOVE_STAFF', facilityId: f.id, facilityName: f.phu, district: f.district,
+      chiefdom: f.chiefdom, staffIds: s.id, detail: 'Remove ' + s.name + ', ' + s.cadre + ', ' + s.phone,
+      by: by, byPhone: byPhone, at: stamp(), status:'Pending', decidedBy:'', decidedAt:'', reason:'', batch: batch });
+  });
+
+  newStaffRows.forEach(function(s){ staff.push(s); });
+  newReqs.forEach(function(r){ requests.push(r); });
+  saveLocal(); paintAll();
+
+  busy('btnUpdSend', true);
+  api('staffChange', { staff: newStaffRows, removeIds: outIds, requests: newReqs }).then(function(res){
+    busy('btnUpdSend', false);
+    if (res && res.ok){
+      boxNote('updMsg', newReqs.length + ' change(s) sent to the admin for review.', 'ok');
+      markedOut = {}; newMembers = []; renderUpdate(); renderRegister();
+      setTimeout(closeUpdate, 1400);
+    } else {
+      boxNote('updMsg','Held on this device, the server did not confirm: ' + (res && res.error ? res.error : 'unknown'), 'bad');
+    }
+  });
+}
+
+/* ============================================================
+   BULK UPLOAD
+   ============================================================ */
+var BULK_HEADS = {
+  district: ['district','dist'],
+  chiefdom: ['chiefdom','chiefdoms','chief dom'],
+  phu: ['phu','facility','facility name','health facility','phu name','hf'],
+  count: ['number of staff','no of staff','staff count','number staff','num staff'],
+  names: ['names','staff names','name','staff name','names and numbers'],
+  phones: ['numbers','telephones','telephone','phone','phones','staff telephone','staff numbers','contact'],
+  cadres: ['cadre','cadres','staff cadre'],
+  incName: ['name of incharge','in-charge name','incharge name','name of in-charge','in charge name','incharge'],
+  incPhone: ['incharge telephone','in-charge telephone','in charge telephone','incharge phone','in-charge phone','incharge number'],
+  type: ['type','facility type'],
+  owner: ['ownership','owner'],
+  status: ['status']
+};
+function headKey(h){
+  var k = String(h||'').toLowerCase().replace(/[_\.]/g,' ').replace(/\s+/g,' ').trim();
+  for (var key in BULK_HEADS) if (BULK_HEADS[key].indexOf(k) > -1) return key;
+  return '';
+}
+function splitCell(v){
+  return String(v == null ? '' : v).split(/[;|\/]|,(?![0-9]{3}\b)/).map(function(x){ return x.trim(); }).filter(function(x){ return x; });
+}
+
+function readBulk(file){
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      var wb = XLSX.read(new Uint8Array(ev.target.result), { type:'array' });
+      var sheet = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(sheet, { defval:'', raw:false });
+      parseBulk(rows);
+    } catch(e){ note('That file could not be read. Save it as .xlsx or .csv and try again.', 'bad'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseBulk(rows){
+  if (!rows.length){ note('The sheet is empty.', 'bad'); return; }
+  var map = {};
+  Object.keys(rows[0]).forEach(function(h){ var k = headKey(h); if (k && !map[k]) map[k] = h; });
+  if (!map.district || !map.phu){
+    note('The sheet needs at least a District column and a PHU column.', 'bad'); return;
+  }
+  var groups = {};
+  rows.forEach(function(r){
+    var district = titleCase(r[map.district]);
+    var chiefdom = map.chiefdom ? titleCase(r[map.chiefdom]) : '';
+    var phu = titleCase(r[map.phu]);
+    if (!district || !phu) return;
+    var key = (district + '|' + chiefdom + '|' + phu).toLowerCase();
+    if (!groups[key]){
+      groups[key] = { district:district, chiefdom:chiefdom, phu:phu, members:[], problems:[],
+        type: map.type ? String(r[map.type]||'').trim() : '', owner: map.owner ? String(r[map.owner]||'').trim() : '',
+        incName: map.incName ? titleCase(r[map.incName]) : '', incPhone: map.incPhone ? String(r[map.incPhone]||'').replace(/\D/g,'') : '',
+        status: map.status ? titleCase(r[map.status]) : 'Active',
+        stated: map.count ? parseInt(String(r[map.count]||'').replace(/\D/g,''),10) : null };
+    }
+    var g = groups[key];
+    if (!g.incName && map.incName) g.incName = titleCase(r[map.incName]);
+    if (!g.incPhone && map.incPhone) g.incPhone = String(r[map.incPhone]||'').replace(/\D/g,'');
+    var names = map.names ? splitCell(r[map.names]) : [];
+    var phones = map.phones ? splitCell(r[map.phones]).map(function(p){ return p.replace(/\D/g,''); }) : [];
+    var cadres = map.cadres ? splitCell(r[map.cadres]) : [];
+    names.forEach(function(nm, i){
+      g.members.push({ name: titleCase(nm), phone: phones[i] || phones[0] || '', cadre: cadres[i] || cadres[0] || 'Other' });
+    });
+  });
+
+  bulkRows = Object.keys(groups).map(function(k){
+    var g = groups[k];
+    if (!g.chiefdom) g.problems.push('No chiefdom');
+    if (!g.incName) g.problems.push('No in-charge name');
+    if (g.incPhone && !phoneOk(g.incPhone)) g.problems.push('In-charge telephone is not 9 digits');
+    g.members.forEach(function(m){ if (m.phone && !phoneOk(m.phone)) g.problems.push(m.name + ' telephone is not 9 digits'); });
+    if (g.stated && g.members.length && g.stated !== g.members.length) g.problems.push('Sheet says ' + g.stated + ' staff, ' + g.members.length + ' listed');
+    var dup = facilities.some(function(f){
+      return f.status !== 'Rejected' && f.district === g.district
+        && String(f.chiefdom).toLowerCase() === String(g.chiefdom).toLowerCase()
+        && String(f.phu).toLowerCase() === String(g.phu).toLowerCase(); });
+    g.duplicate = dup;
+    if (dup) g.problems.push('Already on the register, it will be skipped');
+    return g;
+  });
+
+  renderBulkPreview();
+}
+
+function renderBulkPreview(){
+  var box = document.getElementById('bulkPreview');
+  var good = bulkRows.filter(function(g){ return !g.duplicate; }).length;
+  var h = '<div class="count">' + bulkRows.length + ' facilities read, ' + good + ' ready to upload</div>'
+    + '<div class="tablewrap"><table><tr><th>District</th><th>Chiefdom</th><th>PHU</th><th>In-charge</th><th>Staff</th><th>Notes</th></tr>'
+    + bulkRows.map(function(g){
+        return '<tr><td>' + esc(g.district) + '</td><td>' + esc(g.chiefdom) + '</td><td>' + esc(g.phu) + '</td>'
+          + '<td>' + esc(g.incName) + (g.incPhone ? '<br>' + esc(g.incPhone) : '') + '</td>'
+          + '<td>' + g.members.length + (g.members.length ? '<br><small>' + esc(g.members.map(function(m){ return m.name + ' (' + m.cadre + ')'; }).join(', ')) + '</small>' : '') + '</td>'
+          + '<td>' + (g.problems.length ? '<span class="badge wait">' + esc(g.problems.join('; ')) + '</span>' : '<span class="badge ok">Ready</span>') + '</td></tr>';
+      }).join('') + '</table></div>';
+  box.innerHTML = h;
+  document.getElementById('btnBulkSend').style.display = good ? 'inline-block' : 'none';
+}
+
+function sendBulk(){
+  if (!isAdmin){ note('Sign in on the admin tab before uploading a file of facilities.', 'bad'); show('adm'); return; }
+  var take = bulkRows.filter(function(g){ return !g.duplicate; });
+  if (!take.length){ note('Nothing left to upload.', 'bad'); return; }
+
+  var newFacs = [], newStaff = [];
+  take.forEach(function(g){
+    var fid = uid('F');
+    newFacs.push({ id: fid, district: g.district, chiefdom: g.chiefdom, phu: g.phu,
+      type: g.type || 'CHP', owner: g.owner || 'Government', opened: today(),
+      inchargeName: g.incName, inchargePhone: g.incPhone,
+      status: (g.status === 'Rejected' || g.status === 'Pending') ? g.status : 'Active',
+      dhis2Id:'', dhis2At:'', createdAt: stamp(), createdBy:'Bulk upload', createdByPhone:'' });
+    g.members.forEach(function(m){
+      newStaff.push({ id: uid('S'), facilityId: fid, name: m.name, phone: m.phone, cadre: m.cadre, status:'Active', addedAt: stamp() });
+    });
+  });
+
+  newFacs.forEach(function(f){ facilities.push(f); });
+  newStaff.forEach(function(s){ staff.push(s); });
+  saveLocal(); paintAll();
+
+  busy('btnBulkSend', true);
+  api('bulk', { facilities: newFacs, staff: newStaff, admin: ADMIN_PASSWORD }).then(function(res){
+    busy('btnBulkSend', false);
+    if (res && res.ok){
+      note(newFacs.length + ' facilities and ' + newStaff.length + ' staff added to the register.', 'ok');
+      bulkRows = []; document.getElementById('bulkPreview').innerHTML = '';
+      document.getElementById('bulkFile').value = '';
+      document.getElementById('btnBulkSend').style.display = 'none';
+      show('reg');
+    } else {
+      note('Held on this device, the server did not confirm: ' + (res && res.error ? res.error : 'unknown'), 'bad');
+    }
+  });
+}
+
+function downloadTemplate(){
+  var head = ['District','Chiefdom','PHU','Number of Staff','Staff Names','Telephones','Cadres','In-charge Name','In-charge Telephone','Status'];
+  var sample = ['Bo','Kakua','Ngelehun CHC','3','Alusine Kamara; Fatmata Sesay; Mohamed Bah','076111222; 077333444; 078555666','CHO; SECHN; MCH Aide','Alusine Kamara','076111222','Active'];
+  downloadText('facility_bulk_template.csv', head.join(',') + '\n' + sample.map(csvCell).join(','));
+}
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+function adminLogin(){
+  var v = document.getElementById('admPass').value;
+  if (v !== ADMIN_PASSWORD){ fieldErr('admPass','eAdmPass','Wrong password'); return; }
+  fieldErr('admPass','eAdmPass','');
+  isAdmin = true;
+  document.getElementById('admPass').value = '';
+  document.getElementById('admLogin').style.display = 'none';
+  document.getElementById('admArea').style.display = 'block';
+  renderAdmin();
+}
+function adminLogout(){
+  isAdmin = false;
+  document.getElementById('admLogin').style.display = 'block';
+  document.getElementById('admArea').style.display = 'none';
+}
+function admShow(which){
+  var p = { req:'admReq', move:'admMove', hist:'admHist', d2:'admD2' };
+  var t = { req:'pillReq', move:'pillMove', hist:'pillHist', d2:'pillD2' };
+  for (var k in p){
+    document.getElementById(p[k]).style.display = (k === which) ? 'block' : 'none';
+    document.getElementById(t[k]).classList.toggle('on', k === which);
+  }
+  if (which === 'move') fillMoveLists();
+  if (which === 'hist') renderHistory();
+  if (which === 'd2') renderD2();
+  window.scrollTo(0,0);
+}
+function renderAdmin(){
+  if (!isAdmin) return;
+  renderRequests();
+  document.getElementById('cReq').textContent = requests.filter(function(r){ return r.status === 'Pending'; }).length;
+  if (document.getElementById('admMove').style.display === 'block') fillMoveLists();
+  if (document.getElementById('admHist').style.display === 'block') renderHistory();
+  if (document.getElementById('admD2').style.display === 'block') renderD2();
+}
+
+function reqTitle(r){
+  return r.type === 'NEW_FACILITY' ? 'New facility' : r.type === 'ADD_STAFF' ? 'New member' : 'Remove member';
+}
+function renderRequests(){
+  var pend = requests.filter(function(r){ return r.status === 'Pending'; })
+                     .sort(function(a,b){ return String(a.at).localeCompare(String(b.at)); });
+  var done = requests.filter(function(r){ return r.status !== 'Pending'; })
+                     .sort(function(a,b){ return String(b.decidedAt).localeCompare(String(a.decidedAt)); }).slice(0,40);
+
+  document.getElementById('reqPending').innerHTML = pend.length ? pend.map(function(r){
+    var extra = '';
+    if (r.type === 'NEW_FACILITY'){
+      var f = facById(r.facilityId);
+      var sl = facStaff(r.facilityId, true);
+      extra = '<div class="tablewrap"><table><tr><th>Name</th><th>Cadre</th><th>Telephone</th></tr>'
+        + sl.map(function(s){ return '<tr><td>' + esc(s.name) + '</td><td>' + esc(s.cadre) + '</td><td>' + esc(s.phone) + '</td></tr>'; }).join('')
+        + '</table></div>'
+        + '<p class="meta" style="margin:8px 0 0">' + (f ? esc(f.type + ', ' + f.owner + ', opening ' + niceDay(f.opened)) : '') + '</p>';
+    }
+    return '<div class="reqcard">'
+      + '<div class="rh"><div><b>' + reqTitle(r) + '</b><div class="meta">' + esc(r.facilityName) + ' &middot; ' + esc(r.chiefdom) + ', ' + esc(r.district) + '</div></div>'
+      + '<div class="meta">Sent by ' + esc(r.by) + ' on ' + esc(r.byPhone) + '<br>' + esc(nice(r.at)) + '</div></div>'
+      + '<p style="margin:0 0 10px">' + esc(r.detail) + '</p>' + extra
+      + '<div class="form-foot" style="margin-top:12px">'
+      +   '<button class="btn green sm" onclick="decide(\'' + r.id + '\',1)">Accept</button>'
+      +   '<button class="btn red sm" onclick="askReject(\'' + r.id + '\')">Reject</button>'
+      + '</div></div>';
+  }).join('') : '<div class="card"><p style="margin:0">Nothing is waiting for a decision.</p></div>';
+
+  document.getElementById('reqDone').innerHTML = done.length ? '<div class="tablewrap"><table>'
+    + '<tr><th>Decided</th><th>Request</th><th>Facility</th><th>Detail</th><th>Outcome</th><th>Reason</th></tr>'
+    + done.map(function(r){
+        return '<tr><td>' + esc(nice(r.decidedAt)) + '</td><td>' + reqTitle(r) + '</td><td>' + esc(r.facilityName) + '</td>'
+          + '<td>' + esc(r.detail) + '</td><td>' + (r.status === 'Accepted' ? '<span class="badge ok">Accepted</span>' : '<span class="badge bad">Rejected</span>')
+          + '</td><td>' + esc(r.reason || '') + '</td></tr>';
+      }).join('') + '</table></div>'
+    : '<div class="card"><p style="margin:0">No decision has been taken yet.</p></div>';
+}
+
+function askReject(id){
+  pendingDecision = { id: id, accept: false };
+  document.getElementById('decReason').value = '';
+  document.getElementById('eDec').className = 'err';
+  document.getElementById('decModal').classList.add('on');
+}
+function confirmDecision(){
+  var reason = document.getElementById('decReason').value.trim();
+  if (!reason){
+    var e = document.getElementById('eDec'); e.textContent = 'Give a reason so the PHU knows what to fix.'; e.className = 'err on'; return;
+  }
+  closeModal('decModal');
+  decide(pendingDecision.id, 0, reason);
+}
+
+function decide(id, accept, reason){
+  var r = null;
+  for (var i=0;i<requests.length;i++) if (requests[i].id === id) r = requests[i];
+  if (!r || r.status !== 'Pending') return;
+
+  r.status = accept ? 'Accepted' : 'Rejected';
+  r.decidedBy = 'Admin'; r.decidedAt = stamp(); r.reason = reason || '';
+  var ids = String(r.staffIds || '').split(',').filter(function(x){ return x; });
+
+  if (r.type === 'NEW_FACILITY'){
+    var f = facById(r.facilityId);
+    if (f) f.status = accept ? 'Active' : 'Rejected';
+    staff.forEach(function(s){ if (ids.indexOf(s.id) > -1) s.status = accept ? 'Active' : 'Rejected'; });
+  } else if (r.type === 'ADD_STAFF'){
+    staff.forEach(function(s){ if (ids.indexOf(s.id) > -1) s.status = accept ? 'Active' : 'Rejected'; });
+  } else if (r.type === 'REMOVE_STAFF'){
+    staff.forEach(function(s){ if (ids.indexOf(s.id) > -1) s.status = accept ? 'Removed' : 'Active'; });
+  }
+  saveLocal(); paintAll();
+
+  api('decide', { id: id, accept: accept ? 1 : 0, reason: reason || '', by: 'Admin', admin: ADMIN_PASSWORD }).then(function(res){
+    if (res && res.ok){
+      note('Request ' + (accept ? 'accepted' : 'rejected') + '.', 'ok');
+      if (accept && r.type === 'NEW_FACILITY' && d2.url) note('Facility accepted. Push it to DHIS2 on the DHIS2 settings section.', 'ok');
+    } else {
+      note('The decision is on this device but the server did not confirm: ' + (res && res.error ? res.error : 'unknown'), 'bad');
+    }
+  });
+}
+
+/* ---------- transfers ---------- */
+function fillMoveLists(){
+  var seen = {}, dz = [];
+  facilities.forEach(function(f){
+    if (f.status === 'Active' && f.district && !seen[f.district]){ seen[f.district] = 1; dz.push(f.district); }
+  });
+  dz.sort();
+  ['From','To'].forEach(function(side){
+    var sel = document.getElementById('mv' + side + 'D');
+    var keep = sel.value;
+    sel.innerHTML = '<option value="">All districts</option>' + options(dz);
+    sel.value = keep;
+    if (sel.value !== keep) sel.value = '';
+  });
+  document.getElementById('mvDate').value = document.getElementById('mvDate').value || today();
+  fillMoveSide('From');
+  fillMoveSide('To');
+}
+/* district narrows the chiefdom, chiefdom narrows the facility */
+function fillMoveSide(side){
+  var dSel = document.getElementById('mv' + side + 'D');
+  var cSel = document.getElementById('mv' + side + 'C');
+  var fSel = document.getElementById('mv' + side);
+  var dz = dSel.value;
+  var live = facilities.filter(function(f){ return f.status === 'Active'; });
+
+  var seen = {}, cds = [];
+  live.forEach(function(f){
+    if (dz && f.district !== dz) return;
+    if (f.chiefdom && !seen[f.chiefdom]){ seen[f.chiefdom] = 1; cds.push(f.chiefdom); }
+  });
+  cds.sort();
+  var keepC = cSel.value;
+  cSel.innerHTML = '<option value="">All chiefdoms</option>' + options(cds);
+  cSel.value = keepC;
+  if (cSel.value !== keepC) cSel.value = '';
+
+  var cd = cSel.value;
+  var list = live.filter(function(f){
+    return (!dz || f.district === dz) && (!cd || f.chiefdom === cd);
+  }).sort(function(a,b){ return a.phu.localeCompare(b.phu); });
+
+  var keepF = fSel.value;
+  fSel.innerHTML = '<option value="">Select facility</option>' + list.map(function(f){
+    return '<option value="' + f.id + '">' + esc(f.phu + (cd ? '' : ' (' + f.chiefdom + ')')) + '</option>';
+  }).join('');
+  fSel.value = keepF;
+  if (fSel.value !== keepF) fSel.value = '';
+
+  if (side === 'From') fillMoveStaff();
+}
+function fillMoveStaff(){
+  var fid = document.getElementById('mvFrom').value;
+  var sl = staff.filter(function(s){ return s.facilityId === fid && s.status === 'Active'; })
+                .sort(function(a,b){ return a.name.localeCompare(b.name); });
+  document.getElementById('mvStaff').innerHTML = '<option value="">Select member</option>'
+    + sl.map(function(s){ return '<option value="' + s.id + '">' + esc(s.name + ' (' + s.cadre + ')') + '</option>'; }).join('');
+}
+function doTransfer(){
+  var fromId = document.getElementById('mvFrom').value;
+  var toId = document.getElementById('mvTo').value;
+  var sid = document.getElementById('mvStaff').value;
+  var date = document.getElementById('mvDate').value || today();
+  var reason = document.getElementById('mvReason').value.trim();
+  var e = document.getElementById('eMove');
+
+  if (!fromId || !toId || !sid){ e.textContent = 'Choose the facility, the member and where the member is going.'; e.className='err on'; return; }
+  if (fromId === toId){ e.textContent = 'The two facilities are the same.'; e.className='err on'; return; }
+  e.className = 'err';
+
+  var s = null;
+  for (var i=0;i<staff.length;i++) if (staff[i].id === sid) s = staff[i];
+  if (!s) return;
+  var from = facById(fromId), to = facById(toId);
+
+  var t = { id: uid('T'), staffId: s.id, staffName: s.name, cadre: s.cadre, phone: s.phone,
+    fromId: fromId, fromName: facLabel(from), toId: toId, toName: facLabel(to),
+    date: date, at: stamp(), by: 'Admin', reason: reason };
+
+  s.facilityId = toId;
+  transfers.push(t);
+  saveLocal(); paintAll();
+
+  busy('btnMove', true);
+  api('transfer', { transfer: t, admin: ADMIN_PASSWORD }).then(function(res){
+    busy('btnMove', false);
+    if (res && res.ok) note(s.name + ' moved from ' + t.fromName + ' to ' + t.toName + '.', 'ok');
+    else note('Recorded on this device but the server did not confirm: ' + (res && res.error ? res.error : 'unknown'), 'bad');
+    document.getElementById('mvReason').value = '';
+    fillMoveLists(); renderHistory();
+  });
+}
+function renderHistory(){
+  var q = String((document.getElementById('hSearch') || {}).value || '').toLowerCase().trim();
+  var list = transfers.slice().sort(function(a,b){ return String(b.at).localeCompare(String(a.at)); })
+    .filter(function(t){
+      if (!q) return true;
+      return [t.staffName, t.cadre, t.fromName, t.toName, t.reason].join(' ').toLowerCase().indexOf(q) > -1;
+    });
+  document.getElementById('histTable').innerHTML = list.length
+    ? '<table><tr><th>Effective</th><th>Member</th><th>Cadre</th><th>Telephone</th><th>From</th><th>To</th><th>Reason</th><th>Recorded</th></tr>'
+      + list.map(function(t){
+          return '<tr><td>' + esc(niceDay(t.date)) + '</td><td>' + esc(t.staffName) + '</td><td>' + esc(t.cadre) + '</td>'
+            + '<td>' + esc(t.phone) + '</td><td>' + esc(t.fromName) + '</td><td>' + esc(t.toName) + '</td>'
+            + '<td>' + esc(t.reason || '') + '</td><td>' + esc(nice(t.at)) + '</td></tr>';
+        }).join('') + '</table>'
+    : '<div class="card"><p style="margin:0">No member has been moved yet.</p></div>';
+}
+function exportTransfersCsv(){
+  var head = ['Effective Date','Member','Cadre','Telephone','From','To','Reason','Recorded At','By'];
+  var lines = [head.join(',')].concat(transfers.map(function(t){
+    return [niceDay(t.date), t.staffName, t.cadre, t.phone, t.fromName, t.toName, t.reason || '', t.at, t.by].map(csvCell).join(',');
+  }));
+  downloadText('staff_transfers.csv', lines.join('\n'));
+}
+
+/* ============================================================
+   DHIS2
+   Same call pattern as ICF Collect: try the server directly, fall back to the
+   Apps Script proxy, read the reply loosely, and never fail hard on a create
+   when the org unit may already be there.
+   ============================================================ */
+function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+function d2log(kind, text){
+  var box = document.getElementById('d2Log');
+  if (!box) return;
+  var t = new Date().toLocaleTimeString();
+  box.innerHTML += '<div class="line ' + kind + '">[' + t + '] ' + esc(text) + '</div>';
+  box.scrollTop = box.scrollHeight;
+}
+function d2clear(){ var b = document.getElementById('d2Log'); if (b) b.innerHTML = ''; }
+
+function proxyUrl(proxy, target, auth, method){
+  if (proxy.type === 'direct') return target;
+  var u = proxy.url + '?url=' + encodeURIComponent(target);
+  if (auth) u += '&auth=' + encodeURIComponent(auth);
+  if (method && method !== 'GET') u += '&method=' + method;
+  return u;
+}
+
+/* one DHIS2 call, walked down the proxy list until one answers */
+async function dhis2Request(endpoint, method, payload){
+  method = method || 'GET';
+  if (!d2.url) return { success:false, error:'The DHIS2 base URL is not set' };
+  if (!d2.user) return { success:false, error:'No DHIS2 username was given' };
+
+  var target = d2.url.replace(/\/+$/,'') + '/api/' + endpoint;
+  var auth = btoa(d2.user + ':' + (d2.pass || ''));
+  var lastError = '';
+
+  for (var i = 0; i < PROXIES.length; i++){
+    var proxy = PROXIES[i];
+    var url = proxyUrl(proxy, target, auth, method);
+    var opt;
+
+    if (proxy.type === 'gas'){
+      /* no custom headers, the browser would ask for a preflight the proxy cannot answer */
+      opt = { method: method === 'GET' ? 'GET' : 'POST', redirect:'follow' };
+      if (payload && method !== 'GET'){
+        opt.headers = { 'Content-Type':'text/plain' };
+        opt.body = JSON.stringify(payload);
+      } else if (method !== 'GET'){
+        opt.headers = { 'Content-Type':'text/plain' };
+        opt.body = '{}';
+      }
+    } else {
+      opt = { method: method, headers: { 'Content-Type':'application/json', 'Accept':'application/json', 'Authorization':'Basic ' + auth } };
+      if (method !== 'GET') opt.body = JSON.stringify(payload || {});
+    }
+
+    try{
+      var res = await fetch(url, opt);
+      var text = await res.text();
+      var data;
+      try { data = JSON.parse(text); } catch(e){ data = text; }
+
+      if (data && data.error){
+        var em = (typeof data.error === 'object') ? (data.error.message || 'proxy error') : String(data.error);
+        lastError = proxy.name + ': ' + em;
+        continue;
+      }
+      if (proxy.type === 'direct' && (data === '' || data === null)){ lastError = 'Direct: blocked by CORS'; continue; }
+
+      if (data && (data.httpStatus === 'Unauthorized' || data.httpStatusCode === 401))
+        return { success:false, error:'DHIS2 refused the login, check the username and password' };
+      if (data && data.httpStatusCode && data.httpStatusCode >= 400)
+        return { success:false, error: data.message || ('DHIS2 answered ' + data.httpStatusCode), data:data };
+
+      if (data && typeof data === 'object') return { success:true, data:data, via:proxy.name };
+      lastError = proxy.name + ': the reply could not be read';
+    } catch(err){
+      lastError = proxy.name + ': ' + err.message;
+    }
+  }
+  return { success:false, error: lastError || 'no route to the server' };
+}
+
+function newUid(res){
+  var d = res && res.data;
+  return (d && d.response && d.response.uid) || (d && d.uid) || '';
+}
+
+/* ---------- settings ---------- */
+function renderD2(){
+  /* only write back what is stored, so a value being typed is never wiped */
+  if (d2.url) document.getElementById('d2Url').value = d2.url;
+  if (d2.user) document.getElementById('d2User').value = d2.user;
+  if (d2.pass) document.getElementById('d2Pass').value = d2.pass;
+  document.getElementById('d2Level').value = String(d2.level || 5);
+  d2.parentLevel = d2.level - 1;
+  document.getElementById('d2ParentShow').value = 'Level ' + d2.parentLevel;
+
+  var sets = (d2.allSets && d2.allSets.length) ? d2.allSets : (d2.datasets || []);
+  var chosen = (d2.datasets || []).map(function(x){ return x.id; });
+  document.getElementById('d2Sets').innerHTML = sets.map(function(x){
+    return '<option value="' + esc(x.id) + '"' + (chosen.indexOf(x.id) > -1 ? ' selected' : '') + '>' + esc(x.name) + '</option>';
+  }).join('');
+
+  var queue = facilities.filter(function(f){ return f.status === 'Active' && !f.dhis2Id; })
+                        .sort(function(a,b){ return facLabel(a).localeCompare(facLabel(b)); });
+  document.getElementById('d2Queue').innerHTML = queue.length
+    ? '<div class="form-foot" style="margin-bottom:12px"><button class="btn gold" id="btnPushAll" onclick="dhis2PushAll()">Create all ' + queue.length + ' in DHIS2</button></div>'
+      + '<div class="tablewrap"><table><tr><th>Facility</th><th>Chiefdom</th><th>District</th><th>Action</th></tr>'
+      + queue.map(function(f){
+          return '<tr><td>' + esc(f.phu) + '</td><td>' + esc(f.chiefdom) + '</td><td>' + esc(f.district) + '</td>'
+            + '<td><button class="btn sm gold" id="push' + f.id + '" onclick="dhis2Push(\'' + f.id + '\')">Create in DHIS2</button></td></tr>';
+        }).join('') + '</table></div>'
+    : '<p style="margin:0">Every active facility already carries a DHIS2 org unit.</p>';
+}
+
+function readD2Form(){
+  var sel = document.getElementById('d2Sets');
+  var picked = [];
+  for (var i = 0; i < sel.options.length; i++)
+    if (sel.options[i].selected) picked.push({ id: sel.options[i].value, name: sel.options[i].text });
+  d2.url = String(document.getElementById('d2Url').value || '').trim().replace(/\/+$/,'');
+  d2.user = document.getElementById('d2User').value.trim();
+  d2.pass = document.getElementById('d2Pass').value;
+  var newLevel = parseInt(document.getElementById('d2Level').value, 10) || 5;
+  var newParent = newLevel - 1;                 /* the parent is always one above */
+  if (newLevel !== d2.level || newParent !== d2.parentLevel) parentCache = {};
+  d2.level = newLevel;
+  d2.parentLevel = newParent;
+  document.getElementById('d2ParentShow').value = 'Level ' + newParent;
+  if (!d2.parentMap) d2.parentMap = {};
+  if (picked.length || sel.options.length) d2.datasets = picked;
+  saveD2();
+}
+
+function dhis2Save(){
+  readD2Form();
+  if (!d2.url){ var e = document.getElementById('eD2'); e.textContent = 'Enter the DHIS2 base URL.'; e.className='err on'; return; }
+  document.getElementById('eD2').className = 'err';
+  busy('btnD2Save', true);
+  /* the password stays on this device, the rest goes to the sheet so the next admin sees it */
+  api('saveConfig', { url:d2.url, user:d2.user, level:d2.level, parentLevel:d2.parentLevel, datasets:d2.datasets, admin:ADMIN_PASSWORD })
+    .then(function(res){
+      busy('btnD2Save', false);
+      if (res && res.ok) boxNote('d2Msg','Settings saved. ' + d2.datasets.length + ' data set(s) will be assigned to every new facility. The password is kept on this device only.','ok');
+      else boxNote('d2Msg','Saved on this device. The server copy did not confirm: ' + (res && res.error ? res.error : 'unknown'),'bad');
+      renderD2();
+    });
+}
+
+async function dhis2Test(){
+  readD2Form();
+  busy('btnD2Test', true);
+  d2clear(); d2log('info','Contacting ' + d2.url);
+  boxNote('d2Msg','Contacting the DHIS2 server.','wait');
+
+  var me = await dhis2Request('me.json?fields=id,username,displayName');
+  if (!me.success){
+    busy('btnD2Test', false);
+    d2log('err', me.error);
+    boxNote('d2Msg','No connection: ' + me.error,'bad');
+    return;
+  }
+  d2log('ok','Signed in as ' + (me.data.displayName || me.data.username) + ' by ' + me.via);
+
+  var info = await dhis2Request('system/info.json?fields=version');
+  if (info.success) d2log('ok','DHIS2 version ' + (info.data.version || 'unknown'));
+
+  var lv = await dhis2Request('organisationUnitLevels.json?fields=level,displayName&paging=false');
+  var fName = '', pName = '';
+  if (lv.success && lv.data.organisationUnitLevels){
+    lv.data.organisationUnitLevels.forEach(function(l){
+      if (l.level === d2.level) fName = l.displayName;
+      if (l.level === d2.parentLevel) pName = l.displayName;
+    });
+    d2log('info','Level ' + d2.level + ' is ' + (fName || 'unnamed') + ', parent level ' + d2.parentLevel + ' is ' + (pName || 'unnamed'));
+  }
+  busy('btnD2Test', false);
+  boxNote('d2Msg','Connected as ' + (me.data.displayName || me.data.username)
+    + '. New facilities will be created at level ' + d2.level + (fName ? ' (' + fName + ')' : '') + '.','ok');
+}
+
+/* data sets, read a page at a time because paging=false comes back cut short through the proxy */
+async function dhis2LoadSets(){
+  readD2Form();
+  busy('btnD2Sets', true);
+  d2clear(); d2log('info','Reading the data sets.');
+  boxNote('d2Msg','Reading the data sets.','wait');
+
+  var all = [], page = 1, pages = 1;
+  while (page <= pages && page <= 40){
+    var res = null;
+    for (var a = 1; a <= 3; a++){
+      res = await dhis2Request('dataSets.json?fields=id,displayName&pageSize=200&page=' + page + '&order=displayName:asc');
+      if (res.success && res.data.dataSets) break;
+      if (a < 3) await sleep(1200);
+    }
+    if (!res || !res.success || !res.data.dataSets){
+      busy('btnD2Sets', false);
+      d2log('err', (res && res.error) || 'the data sets could not be read');
+      boxNote('d2Msg','The data sets could not be read: ' + ((res && res.error) || 'unknown'),'bad');
+      return;
+    }
+    res.data.dataSets.forEach(function(x){ all.push({ id:x.id, name:x.displayName }); });
+    pages = (res.data.pager && res.data.pager.pageCount) || 1;
+    d2log('info','Page ' + page + ' of ' + pages + ', ' + all.length + ' so far');
+    page++;
+  }
+  d2.allSets = all; saveD2(); renderD2();
+  busy('btnD2Sets', false);
+  d2log('ok', all.length + ' data sets read');
+  boxNote('d2Msg', all.length + ' data sets read. Pick the ones to assign, then save the settings.','ok');
+}
+
+/* find one org unit by name, optionally under a parent */
+async function findOrgUnit(name, level, parentId){
+  if (!name) return null;
+  var q = 'organisationUnits.json?fields=id,name,level&paging=false&filter=name:eq:' + encodeURIComponent(name);
+  if (level) q += '&filter=level:eq:' + level;
+  if (parentId) q += '&filter=parent.id:eq:' + parentId;
+  for (var a = 1; a <= 3; a++){
+    var res = await dhis2Request(q);
+    if (res.success && res.data.organisationUnits) return res.data.organisationUnits[0] || null;
+    if (a < 3) await sleep(1200);
+  }
+  return null;
+}
+async function findOrgUnitLike(name, level, parentId){
+  var q = 'organisationUnits.json?fields=id,name,level&paging=false&filter=name:ilike:' + encodeURIComponent(name);
+  if (level) q += '&filter=level:eq:' + level;
+  if (parentId) q += '&filter=parent.id:eq:' + parentId;
+  var res = await dhis2Request(q);
+  if (res.success && res.data.organisationUnits) return res.data.organisationUnits[0] || null;
+  return null;
+}
+
+/* ---------- parent org units ----------
+   The chiefdom on the register and the chiefdom in DHIS2 are often spelt
+   differently, Bagbe against Bargbe for one. So the whole parent level is read
+   once, matched loosely, and anything still unclear is put to the admin, whose
+   choice is remembered for every later facility in that chiefdom. */
+var parentCache = {};
+
+async function loadParents(){
+  if (parentCache[d2.parentLevel]) return parentCache[d2.parentLevel];
+  d2log('info','Reading every org unit at level ' + d2.parentLevel);
+  var all = [], page = 1, pages = 1;
+  while (page <= pages && page <= 60){
+    var res = null;
+    for (var a = 1; a <= 3; a++){
+      res = await dhis2Request('organisationUnits.json?fields=id,name,level,parent[id,name]&filter=level:eq:'
+        + d2.parentLevel + '&pageSize=300&page=' + page + '&order=name:asc');
+      if (res.success && res.data.organisationUnits) break;
+      if (a < 3) await sleep(1200);
+    }
+    if (!res || !res.success || !res.data.organisationUnits) break;
+    res.data.organisationUnits.forEach(function(o){ all.push(o); });
+    pages = (res.data.pager && res.data.pager.pageCount) || 1;
+    page++;
+  }
+  d2log(all.length ? 'ok' : 'err', all.length + ' org units read at level ' + d2.parentLevel);
+  if (all.length) parentCache[d2.parentLevel] = all;
+  return all;
+}
+
+function norm(v){ return String(v || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+function editDistance(a, b){
+  if (a === b) return 0;
+  var m = a.length, n = b.length, prev = [], cur = [], i, j;
+  for (j = 0; j <= n; j++) prev[j] = j;
+  for (i = 1; i <= m; i++){
+    cur[0] = i;
+    for (j = 1; j <= n; j++){
+      cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    }
+    for (j = 0; j <= n; j++) prev[j] = cur[j];
+  }
+  return prev[n];
+}
+function parentLabel(o){
+  return o.name + (o.parent && o.parent.name ? ' (' + o.parent.name + ')' : '');
+}
+
+/* returns { unit } when it is certain, otherwise { choices } to put to the admin */
+function matchParent(list, chiefdom, district){
+  var nC = norm(chiefdom), nD = norm(district);
+  var exact = list.filter(function(o){ return norm(o.name) === nC; });
+  if (exact.length === 1) return { unit: exact[0] };
+  if (exact.length > 1){
+    var inD = exact.filter(function(o){ return norm(o.parent && o.parent.name) === nD; });
+    if (inD.length === 1) return { unit: inD[0] };
+    return { choices: exact };
+  }
+  var near = [];
+  list.forEach(function(o){
+    var nO = norm(o.name);
+    if (!nO) return;
+    var d = editDistance(nO, nC);
+    var touches = nO.indexOf(nC) > -1 || nC.indexOf(nO) > -1;
+    if (d <= 2 || touches) near.push({ o:o, d: touches ? Math.min(d, 2) : d });
+  });
+  var sameD = near.filter(function(x){ return norm(x.o.parent && x.o.parent.name) === nD; });
+  var pool = sameD.length ? sameD : near;
+  pool.sort(function(a,b){ return a.d - b.d; });
+  /* one close spelling inside the right district is taken as the match */
+  if (sameD.length === 1 && sameD[0].d <= 2) return { unit: sameD[0].o };
+  return { choices: pool.map(function(x){ return x.o; }) };
+}
+
+/* ---------- picker ---------- */
+var pickState = null;
+function pickParent(fac, list, suggestions){
+  return new Promise(function(resolve){
+    pickState = { list: list, suggest: suggestions || [], resolve: resolve };
+    document.getElementById('pickHint').textContent =
+      'No org unit at level ' + d2.parentLevel + ' is clearly ' + fac.chiefdom + ' in ' + fac.district
+      + '. Pick the one that holds ' + fac.phu + '. The choice is kept for every other facility in ' + fac.chiefdom + '.';
+    document.getElementById('pickSearch').value = '';
+    renderPickList();
+    document.getElementById('pickModal').classList.add('on');
+    setTimeout(function(){ document.getElementById('pickSearch').focus(); }, 60);
+  });
+}
+function renderPickList(){
+  if (!pickState) return;
+  var q = norm(document.getElementById('pickSearch').value);
+  var rows = q
+    ? pickState.list.filter(function(o){ return norm(parentLabel(o)).indexOf(q) > -1; })
+    : (pickState.suggest.length ? pickState.suggest : pickState.list);
+  var head = (!q && pickState.suggest.length) ? '<p class="hint">Closest names first, or search for another.</p>' : '';
+  document.getElementById('pickList').innerHTML = head + (rows.length
+    ? rows.slice(0, 200).map(function(o){
+        return '<div class="staffrow"><div class="who"><b>' + esc(o.name) + '</b>'
+          + '<small>' + (o.parent && o.parent.name ? esc(o.parent.name) + ' &middot; ' : '') + 'level ' + o.level + '</small></div>'
+          + '<button class="btn sm" onclick="pickChoose(\'' + o.id + '\')">Use this</button></div>';
+      }).join('')
+    : '<p class="hint">Nothing matches that search.</p>');
+}
+function pickChoose(id){
+  var unit = null;
+  pickState.list.forEach(function(o){ if (o.id === id) unit = o; });
+  document.getElementById('pickModal').classList.remove('on');
+  var r = pickState.resolve; pickState = null;
+  r(unit);
+}
+function pickCancel(){
+  document.getElementById('pickModal').classList.remove('on');
+  var r = pickState ? pickState.resolve : null; pickState = null;
+  if (r) r(null);
+}
+
+/* ---------- push ---------- */
+async function resolveParent(f){
+  var key = f.district + '|' + f.chiefdom;
+  if (!d2.parentMap) d2.parentMap = {};
+  var saved = d2.parentMap[key];
+  if (saved && saved.level === d2.parentLevel){
+    d2log('info','Parent already matched: ' + saved.name);
+    return saved;
+  }
+  var list = await loadParents();
+  if (!list.length) return null;
+
+  var m = matchParent(list, f.chiefdom, f.district);
+  var unit = m.unit || null;
+  if (!unit){
+    unit = await pickParent(f, list, m.choices || []);
+    if (!unit) return null;
+    d2log('ok', f.chiefdom + ' matched by hand to ' + unit.name);
+  } else if (norm(unit.name) !== norm(f.chiefdom)){
+    d2log('warn', f.chiefdom + ' read as ' + unit.name + ' in DHIS2');
+  }
+  var keep = { id: unit.id, name: unit.name, level: unit.level, parentName: unit.parent && unit.parent.name };
+  d2.parentMap[key] = keep;
+  saveD2();
+  return keep;
+}
+
+async function dhis2Push(fid, quiet){
+  var f = facById(fid);
+  if (!f) return false;
+  readD2Form();
+  if (!d2.url || !d2.user){ boxNote('d2Msg','Enter the DHIS2 URL and login first.','bad'); return false; }
+  if (f.dhis2Id) return true;
+
+  busy('push' + fid, true);
+  if (!quiet) d2clear();
+  d2log('info','Creating ' + f.phu + ' under ' + f.chiefdom + ', ' + f.district);
+  boxNote('d2Msg','Working on ' + f.phu + '.','wait');
+
+  var parent = await resolveParent(f);
+  if (!parent){
+    busy('push' + fid, false);
+    d2log('err','No parent chosen for ' + f.chiefdom);
+    boxNote('d2Msg','Not created. ' + f.phu + ' has no parent in DHIS2 yet, so nothing was sent.','bad');
+    return false;
+  }
+  d2log('ok','Parent: ' + parent.name + ' at level ' + parent.level);
+
+  var uid = '', created = false;
+  var exists = await findOrgUnit(f.phu, d2.level, parent.id);
+  if (exists){ uid = exists.id; d2log('info','Already in DHIS2 as ' + uid); }
+
+  if (!uid){
+    var body = {
+      name: f.phu,
+      shortName: f.phu.substring(0, 50),
+      openingDate: String(f.opened || '').substring(0,10) || '1970-01-01',
+      parent: { id: parent.id }
+    };
+    var res = await dhis2Request('organisationUnits', 'POST', body);
+    uid = newUid(res);
+
+    if (!uid){
+      d2log('warn','First attempt refused, trying ' + f.phu + ' ' + f.chiefdom);
+      body.name = f.phu + ' ' + f.chiefdom;
+      body.shortName = (f.phu + ' ' + f.chiefdom).substring(0, 50);
+      res = await dhis2Request('organisationUnits', 'POST', body);
+      uid = newUid(res);
+    }
+    if (!uid){
+      var again = await findOrgUnit(f.phu, d2.level, parent.id) || await findOrgUnitLike(f.phu, d2.level, parent.id);
+      if (again) uid = again.id;
+    }
+    if (!uid){
+      busy('push' + fid, false);
+      d2log('err','DHIS2 would not create it: ' + (res.error || (res.data && res.data.message) || 'no uid returned'));
+      boxNote('d2Msg','Not created: ' + (res.error || (res.data && res.data.message) || 'DHIS2 returned no uid') + '.','bad');
+      return false;
+    }
+    created = true;
+    d2log('ok','Created as ' + uid);
+  }
+
+  var assigned = 0, failed = [];
+  for (var i = 0; i < (d2.datasets || []).length; i++){
+    var ds = d2.datasets[i];
+    var a = await dhis2Request('dataSets/' + ds.id + '/organisationUnits/' + uid, 'POST');
+    if (a.success){ assigned++; d2log('ok','Assigned ' + ds.name); }
+    else { failed.push(ds.name); d2log('warn','Could not assign ' + ds.name + ': ' + a.error); }
+    await sleep(250);
+  }
+
+  f.dhis2Id = uid; f.dhis2At = stamp();
+  saveLocal();
+  await api('dhis2Uid', { facilityId: f.id, uid: uid, admin: ADMIN_PASSWORD });
+
+  busy('push' + fid, false);
+  renderD2(); renderRegister();
+  boxNote('d2Msg', f.phu + (created ? ' created as ' : ' was already in DHIS2 as ') + uid
+    + ', under ' + parent.name + ', ' + assigned + ' data set(s) assigned'
+    + (failed.length ? ', ' + failed.length + ' refused' : '') + '.', 'ok');
+  return true;
+}
+
+async function dhis2PushAll(){
+  var queue = facilities.filter(function(f){ return f.status === 'Active' && !f.dhis2Id; });
+  if (!queue.length) return;
+  busy('btnPushAll', true);
+  d2clear();
+  d2log('info','Creating ' + queue.length + ' facilities in DHIS2.');
+  var done = 0, stuck = 0;
+  for (var i = 0; i < queue.length; i++){
+    var ok = await dhis2Push(queue[i].id, true);
+    if (ok) done++; else stuck++;
+    await sleep(300);
+  }
+  busy('btnPushAll', false);
+  d2log(stuck ? 'warn' : 'ok', 'Finished: ' + done + ' in DHIS2, ' + stuck + ' left');
+  boxNote('d2Msg', done + ' facilities are now in DHIS2' + (stuck ? ', ' + stuck + ' could not be created, see the log' : '') + '.', stuck ? 'bad' : 'ok');
+  renderD2();
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+/* ---------- district to chiefdom cascade ---------- */
+function chiefdomsFor(district){
+  var seen = {}, out = [];
+  function add(n){ n = titleCase(n); if (n && !seen[n]){ seen[n] = 1; out.push(n); } }
+  (CHIEFDOMS[district] || []).forEach(add);
+  (csvChiefdoms[district] || []).forEach(add);
+  facilities.forEach(function(f){ if (!district || f.district === district) add(f.chiefdom); });
+  return out.sort();
+}
+function fillChiefdoms(){
+  fieldErr('nDistrict','eDistrict','');
+  var dz = document.getElementById('nDistrict').value;
+  var sel = document.getElementById('nChiefdom');
+  var keep = sel.value;
+  if (!dz){
+    sel.innerHTML = '<option value="">Choose a district first</option>';
+  } else {
+    sel.innerHTML = '<option value="">Select chiefdom</option>' + options(chiefdomsFor(dz))
+      + '<option value="' + OTHER + '">Not listed, type it</option>';
+    sel.value = keep;
+    if (sel.value !== keep) sel.value = '';
+  }
+  toggleChiefdomOther();
+}
+function toggleChiefdomOther(){
+  var on = document.getElementById('nChiefdom').value === OTHER;
+  var box = document.getElementById('nChiefdomOther');
+  box.style.display = on ? 'block' : 'none';
+  if (!on) box.value = '';
+  else setTimeout(function(){ box.focus(); }, 40);
+  fieldErr('nChiefdom','eChiefdom','');
+}
+function newChiefdomValue(){
+  var v = document.getElementById('nChiefdom').value;
+  return titleCase(v === OTHER ? document.getElementById('nChiefdomOther').value : v);
+}
+function fillFilterChiefdoms(){
+  var dz = document.getElementById('fDistrict').value;
+  var sel = document.getElementById('fChiefdom');
+  var keep = sel.value;
+  var seen = {}, list = [];
+  facilities.forEach(function(f){
+    if (dz && f.district !== dz) return;
+    if (f.chiefdom && !seen[f.chiefdom]){ seen[f.chiefdom] = 1; list.push(f.chiefdom); }
+  });
+  list.sort();
+  sel.innerHTML = '<option value="">All chiefdoms</option>' + options(list);
+  sel.value = keep;
+  if (sel.value !== keep) sel.value = '';
+  renderRegister();
+}
+/* facilities.csv beside the page, District and Chiefdom columns, is the master list */
+function loadFacilitiesCsv(){
+  return fetch('facilities.csv?t=' + Date.now()).then(function(r){
+    if (!r.ok) throw new Error('no file');
+    return r.text();
+  }).then(function(text){
+    var lines = text.split(/\r?\n/).filter(function(l){ return l.trim(); });
+    if (lines.length < 2) return;
+    var head = splitCsvLine(lines[0]).map(function(h){ return h.toLowerCase().trim(); });
+    var di = head.indexOf('district'), ci = head.indexOf('chiefdom');
+    if (di < 0 || ci < 0) return;
+    var map = {};
+    for (var i = 1; i < lines.length; i++){
+      var c = splitCsvLine(lines[i]);
+      var dz = titleCase(c[di] || ''), cd = titleCase(c[ci] || '');
+      if (!dz || !cd) continue;
+      if (!map[dz]) map[dz] = [];
+      if (map[dz].indexOf(cd) === -1) map[dz].push(cd);
+    }
+    csvChiefdoms = map;
+    fillChiefdoms();
+  }).catch(function(){ /* no CSV, the built in list stands */ });
+}
+function splitCsvLine(line){
+  var out = [], cur = '', q = false;
+  for (var i = 0; i < line.length; i++){
+    var ch = line[i];
+    if (ch === '"'){ if (q && line[i+1] === '"'){ cur += '"'; i++; } else q = !q; }
+    else if (ch === ',' && !q){ out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out.map(function(x){ return x.trim(); });
+}
+function paintAll(){
+  if (document.getElementById('panelReg').classList.contains('on')) renderRegister();
+  if (isAdmin) renderAdmin();
+}
+function init(){
+  document.getElementById('nDistrict').innerHTML = '<option value="">Select district</option>' + options(DISTRICTS);
+  document.getElementById('fDistrict').innerHTML = '<option value="">All districts</option>' + options(DISTRICTS);
+  fillChiefdoms();
+  document.getElementById('nType').innerHTML = options(TYPES, 'CHP');
+  document.getElementById('nOwner').innerHTML = options(OWNERS, 'Government');
+  document.getElementById('nOpened').value = today();
+  buildStaffRows();
+  loadLocal();
+  paintAll();
+  loadFacilitiesCsv();
+  pullAll(false).then(function(){ fillFilterChiefdoms(); });
+}
+init();
+</script>
+</body>
+</html>
