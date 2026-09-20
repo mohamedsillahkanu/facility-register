@@ -1726,6 +1726,13 @@ function editDistance(a, b){
   }
   return prev[n];
 }
+/* the name sent to DHIS2: the PHU name with its facility type on the end */
+function dhis2Name(f){
+  var t = String(f.type || '').trim();
+  var n = String(f.phu || '').trim();
+  if (t && norm(n).indexOf(norm(t)) === -1) n = n + ' ' + t;
+  return n;
+}
 function parentLabel(o){
   return o.name + (o.parent && o.parent.name ? ' (' + o.parent.name + ')' : '');
 }
@@ -1846,35 +1853,49 @@ async function dhis2Push(fid, quiet){
   }
   d2log('ok','Parent: ' + parent.name + ' at level ' + parent.level);
 
+  /* the org unit name carries the facility type, Mohamed CHP, unless the name already has it */
+  var wanted = dhis2Name(f);
   var uid = '', created = false;
-  var exists = await findOrgUnit(f.phu, d2.level, parent.id);
-  if (exists){ uid = exists.id; d2log('info','Already in DHIS2 as ' + uid); }
+  var exists = await findOrgUnit(wanted, d2.level, parent.id);
+  if (!exists && wanted !== f.phu) exists = await findOrgUnit(f.phu, d2.level, parent.id);
+  if (exists){ uid = exists.id; d2log('info','Already in DHIS2 as ' + exists.name + ', ' + uid); }
 
   if (!uid){
     var body = {
-      name: f.phu,
-      shortName: f.phu.substring(0, 50),
+      name: wanted,
+      shortName: wanted.substring(0, 50),
       openingDate: String(f.opened || '').substring(0,10) || '1970-01-01',
       parent: { id: parent.id }
     };
+    d2log('info','Sending ' + wanted);
     var res = await dhis2Request('organisationUnits', 'POST', body);
     uid = newUid(res);
 
+    /* no uid in the reply does not mean it was not created, so look before sending anything again */
     if (!uid){
-      d2log('warn','First attempt refused, trying ' + f.phu + ' ' + f.chiefdom);
-      body.name = f.phu + ' ' + f.chiefdom;
-      body.shortName = (f.phu + ' ' + f.chiefdom).substring(0, 50);
+      await sleep(900);
+      var check = await findOrgUnit(wanted, d2.level, parent.id);
+      if (check){ uid = check.id; d2log('ok','The first attempt did land, ' + uid); }
+    }
+
+    /* only a short name clash is retried, and only the short name changes, so the name never doubles up */
+    if (!uid){
+      d2log('warn','Retrying with a longer short name, the name stays ' + wanted);
+      body.shortName = (wanted + ' ' + f.district).substring(0, 50);
       res = await dhis2Request('organisationUnits', 'POST', body);
       uid = newUid(res);
+      if (!uid){
+        await sleep(900);
+        var check2 = await findOrgUnit(wanted, d2.level, parent.id);
+        if (check2) uid = check2.id;
+      }
     }
-    if (!uid){
-      var again = await findOrgUnit(f.phu, d2.level, parent.id) || await findOrgUnitLike(f.phu, d2.level, parent.id);
-      if (again) uid = again.id;
-    }
+
     if (!uid){
       busy('push' + fid, false);
       d2log('err','DHIS2 would not create it: ' + (res.error || (res.data && res.data.message) || 'no uid returned'));
-      boxNote('d2Msg','Not created: ' + (res.error || (res.data && res.data.message) || 'DHIS2 returned no uid') + '.','bad');
+      boxNote('d2Msg','Not created: ' + (res.error || (res.data && res.data.message) || 'DHIS2 returned no uid')
+        + '. Nothing was sent twice, so there is no half made org unit to clean up.','bad');
       return false;
     }
     created = true;
@@ -1896,7 +1917,7 @@ async function dhis2Push(fid, quiet){
 
   busy('push' + fid, false);
   renderD2(); renderRegister();
-  boxNote('d2Msg', f.phu + (created ? ' created as ' : ' was already in DHIS2 as ') + uid
+  boxNote('d2Msg', wanted + (created ? ' created as ' : ' was already in DHIS2 as ') + uid
     + ', under ' + parent.name + ', ' + assigned + ' data set(s) assigned'
     + (failed.length ? ', ' + failed.length + ' refused' : '') + '.', 'ok');
   return true;
