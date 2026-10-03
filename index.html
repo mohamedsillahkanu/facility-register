@@ -219,23 +219,34 @@ body.mapmode #panelMaster .card{margin:0 0 10px;padding:12px}
 #panelMaster .mstat b{font-size:18px}
 #panelMaster .mstat span{font-size:10.5px}
 #panelMaster .legend-row{margin-top:8px;font-size:12px}
-.maplayout{display:grid;grid-template-columns:330px 1fr;gap:12px;align-items:start}
-.maplayout .filtercard{position:sticky;top:8px;max-height:calc(100vh - 150px);overflow:auto}
+.maplayout{display:grid;grid-template-columns:280px 1fr 500px;gap:10px;align-items:start}
+.maplayout .filtercard{position:sticky;top:8px;max-height:calc(100vh - 130px);overflow:auto;margin:0}
+.maplayout .mapcard{margin:0;padding:10px;overflow:hidden;position:sticky;top:8px}
+.maplayout .mapcard #hfMap{width:100%;border-radius:8px;margin-top:2px}
+.maplayout .profilecard{position:sticky;top:8px;max-height:calc(100vh - 130px);overflow:auto;margin:0}
 /* one fixed map size inside its panel, no zoom buttons */
-#hfMap{height:520px;width:100%}
+#hfMap{width:100%;max-width:600px;aspect-ratio:1 / 1;height:auto;min-height:300px;max-height:58vh}
 .leaflet-control-zoom{display:none !important}
 #panelMaster .mfilters{grid-template-columns:1fr 1fr}
 #panelMaster .mstats{flex-direction:column;gap:6px}
 #panelMaster .mstat{flex:1 1 auto}
+@media(max-width:1400px){
+  .maplayout{grid-template-columns:260px 1fr 420px}
+}
+@media(max-width:1180px){
+  .maplayout{grid-template-columns:250px 1fr}
+  .maplayout .profilecard{grid-column:1 / -1;position:static;max-height:none;overflow:visible}
+}
 @media(max-width:980px){
   .maplayout{grid-template-columns:1fr}
-  .maplayout .filtercard{position:static;max-height:none}
+  .maplayout .mapcard{position:static}
+  .maplayout .filtercard{position:static;max-height:none;overflow:visible}
   #panelMaster .mfilters{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
   #panelMaster .mstats{flex-direction:row;flex-wrap:wrap}
-  #hfMap{height:420px}
+  #hfMap{aspect-ratio:1 / 1;min-height:320px}
 }
 @media(max-width:640px){
-  #hfMap{height:340px}
+  #hfMap{aspect-ratio:1 / 1;min-height:280px}
 }
 
 .mfilters{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
@@ -247,6 +258,9 @@ body.mapmode #panelMaster .card{margin:0 0 10px;padding:12px}
 .mstat.warn{background:#fff5e0;border-left-color:#e8a200}
 .mstat.warn b{color:#7a5200}
 #hfMap{border:1px solid var(--line);border-radius:10px;margin-top:4px}
+/* no browser focus rectangle around a clicked boundary or marker */
+#hfMap path,#hfMap .leaflet-interactive,#hfMap svg a,#hfMap g{outline:0 !important}
+#hfMap path:focus,#hfMap .leaflet-interactive:focus,#hfMap .leaflet-interactive:focus-visible{outline:0 !important}
 
 .legend-row{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 0;font-size:12.5px;color:#3c5a73}
 .fac-tip{background:#1f4a6a;color:#fff;border:0;border-radius:6px;padding:6px 9px;font-size:12.5px;
@@ -259,6 +273,82 @@ body.mapmode #panelMaster .card{margin:0 0 10px;padding:12px}
 .mtable td{padding:7px 8px;border-bottom:1px solid #eef3f7}
 .mtable tr:nth-child(even) td{background:#fafcfe}
 .mwrap{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:10px}
+.psect{font-family:'Oswald',Arial,sans-serif;text-transform:uppercase;font-size:12.5px;letter-spacing:.05em;
+  color:var(--navy);border-bottom:2px solid var(--gold);padding-bottom:4px;margin:14px 0 7px}
+.pkv{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:3px 0;border-bottom:1px dotted var(--line)}
+.pkv b{color:var(--navy)}
+.pchips{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{font-size:11.5px;padding:3px 8px;border-radius:10px;border:1px solid var(--line);background:#f4f7fa}
+.pchip.yes{background:#e7f5ea;border-color:#9ccc9e;color:#1b5e20}
+.pchip.no{background:#fdeaea;border-color:#e3a9a4;color:#8c1c1c}
+.ptable{width:100%;border-collapse:collapse;font-size:12.5px}
+.ptable th{background:var(--blue-lt);color:var(--navy);text-align:left;padding:6px 7px;border-bottom:1px solid var(--line)}
+.ptable td{padding:5px 7px;border-bottom:1px solid #eef3f7}
+.pdummy{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;background:#fff5e0;
+  border:1px solid #e8c766;color:#7a5200;padding:1px 6px;border-radius:9px;margin-left:6px}
+.pempty{font-size:13px;color:#3c5a73;margin:0}
+.pacc{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;overflow:hidden;background:#fff}
+.pacc-head{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;
+  background:var(--blue-lt);border:0;cursor:pointer;padding:9px 11px;text-align:left;
+  font-family:'Oswald',Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;
+  font-size:13px;color:var(--navy);user-select:none}
+.pacc-tools{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.pacc-fs{background:#fff;border:1px solid var(--line);color:var(--navy);border-radius:5px;
+  cursor:pointer;font-size:13px;line-height:1;padding:3px 7px}
+.pacc-fs:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.fspane{position:fixed;inset:0;z-index:4000;background:#fff;flex-direction:column}
+body.fsmode{overflow:hidden}
+.fshead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex:0 0 auto;
+  padding:12px 16px;border-bottom:3px solid var(--gold);background:var(--navy);color:#fff}
+.fshead b{font-family:'Oswald',Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;font-size:16px;display:block}
+.fshead small{display:block;font-size:12px;color:#bcd2e8}
+.fshead .btn{background:#fff;color:var(--navy)}
+.fsbody{flex:1 1 auto;overflow:auto;padding:0 16px 16px;position:relative}
+.fsbody .itable{min-width:0;width:100%;font-size:13.5px;border-collapse:separate;border-spacing:0}
+.fsbody .itable th,.fsbody .itable td{padding:7px 10px}
+/* the heading row stays put while the months scroll under it */
+.fsbody .ptable th{position:sticky;top:0;z-index:3;background:var(--blue-lt);
+  box-shadow:0 2px 0 var(--line)}
+.plot-ax{font-size:11px}
+.plot-title{font-family:'Oswald',Arial,sans-serif;font-size:17px;fill:#004080;letter-spacing:.03em}
+.plot-sub{font-size:11.5px;fill:#6b7683;font-family:'Roboto',Arial,sans-serif}
+.plot-lab{font-size:12.5px;fill:#3c5a73;font-family:'Roboto',Arial,sans-serif;font-weight:700}
+.plots{display:grid;grid-template-columns:1fr;gap:14px}
+.plot{border:1px solid var(--line);border-radius:8px;padding:7px 8px 2px;background:#fff}
+.plot-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11.5px;color:#3c5a73}
+.plot-head b{color:var(--navy);font-size:11.5px;white-space:nowrap}
+.plot-box{position:relative}
+.plot svg{width:100%;height:270px;display:block;cursor:crosshair}
+.fsbody .plot svg{height:420px}
+.ptip{position:absolute;display:none;transform:translateX(-50%);background:#1f4a6a;color:#fff;
+  padding:4px 9px;border-radius:6px;font-size:12px;white-space:nowrap;pointer-events:none;
+  box-shadow:0 3px 10px rgba(0,0,0,.3);z-index:5}
+.ptip b{color:#ffd76a;margin-right:4px}
+.plot-ax{font-size:9px;fill:#6b7683;font-family:'Roboto',Arial,sans-serif}
+.fsbody .plots{grid-template-columns:1fr;gap:18px}
+
+.fsbody .plot-head{font-size:13px}
+.fsbody .plot-head b{font-size:13px}
+.fsbody .ptable{border-collapse:separate;border-spacing:0}
+.fsbody .ptable td{border-bottom:1px solid #eef3f7}
+.fsbody .itable .trow td{position:sticky;bottom:0;z-index:2}
+.fsbody .pkv{font-size:14.5px;padding:6px 0}
+.fsbody .pchip{font-size:13px;padding:5px 11px}
+.fsbody .ptable{font-size:14px}
+.pacc-head:hover{background:#dce9f4}
+.pacc.open .pacc-head{border-bottom:1px solid var(--line)}
+.pacc-sign{font-size:16px;line-height:1;font-weight:700}
+.pacc-body{padding:8px}
+.pacc .pacc{margin-bottom:6px}
+.pacc .pacc:last-child{margin-bottom:0}
+.pacc .pacc .pacc-head{background:#f3f8fc;font-size:12.5px;padding:7px 10px}
+.pacc .pacc .pacc .pacc-head{background:#fff;border-bottom:1px solid var(--line);font-size:12px;padding:6px 10px}
+.pscroll{overflow-x:auto}
+.itable{min-width:560px;font-size:12px}
+.itable th{white-space:nowrap;font-size:11px;padding:5px 6px}
+.itable td{white-space:nowrap;padding:4px 6px}
+.itable td:first-child,.itable td:nth-child(2){color:#3c5a73}
+.itable .trow td{font-weight:700;background:#f3f8fc;color:var(--navy);border-top:2px solid var(--gold)}
 .pill-miss{background:#fdeaea;color:#8c1c1c;border-radius:10px;padding:1px 8px;font-size:11.5px;font-weight:700}
 </style>
 </head>
@@ -313,6 +403,7 @@ body.mapmode #panelMaster .card{margin:0 0 10px;padding:12px}
   <!-- ================= MASTER LIST AND MAP ================= -->
   <section class="panel" id="panelMaster">
     <div class="maplayout">
+
     <div class="card filtercard">
       <h2>Filter the master list</h2>
       <div class="mfilters">
@@ -359,6 +450,11 @@ body.mapmode #panelMaster .card{margin:0 0 10px;padding:12px}
       </div>
       <p class="hint" id="missNote" style="margin-top:8px"></p>
     </div>
+
+    <div class="card profilecard" id="facProfile"></div>
+
+
+
     </div>
 
     <div class="card">
@@ -2414,6 +2510,7 @@ var MASTER = (function(){
 })();
 
 var hfMap = null, hfLayer = null, mlReady = false, geoLayer = null, osmLayer = null, geoData = null;
+var lastFit = null;
 var BOUNDARY_URL = 'https://raw.githubusercontent.com/mohamedsillahkanu/facility-register/f0400b260f55330daa32a1cc428ad7f421cd0c34/Chiefdom_Shapefiles_new.geojson';
 var TYPE_COLOUR = { 'CHC':'#2c6793', 'CHP':'#009e73', 'MCHP':'#e69f00', 'CLINIC':'#cc79a7', 'HOSPITAL':'#b3261e' };
 
@@ -2475,7 +2572,390 @@ function mlFiltered(){
     return true;
   });
 }
+/* ============================================================
+   FACILITY PROFILE, shown when a point on the map is clicked
+   Infrastructure, services, staff and the programme indicators are dummy for
+   now. They all come out of hfExtras() below, so when the Google Sheet is
+   ready only that one function changes.
+   ============================================================ */
+var mlPicked = '';
+var progOpen = {};
+var sectOpen = {};
+var PROGRAMMES = ['Malaria','TB','HIV','NTD','Nutrition','EPI'];
+var SERVICE_LIST = ['OPD','ANC','Delivery','Postnatal','Immunisation','Family planning','Laboratory',
+  'Pharmacy','Nutrition','HIV testing','TB screening','Inpatient'];
+var INDICATORS = {
+  'Malaria': ['Suspected cases','Tested with RDT','Confirmed cases','Treated with ACT','ITNs given at ANC','IPTp3 doses'],
+  'TB': ['Presumptive cases','Sputum samples sent','Cases notified','On treatment','Treatment success','Contacts screened'],
+  'HIV': ['Tested','Positive','On ART','ANC clients tested','PMTCT clients','Viral load samples'],
+  'NTD': ['MDA treated','Schistosomiasis cases','Lymphatic filariasis cases','Trachoma screened','Referrals','Drug distributors'],
+  'Nutrition': ['Children screened','MAM cases','SAM cases','RUTF cartons used','Vitamin A doses','Growth monitoring visits'],
+  'EPI': ['BCG doses','Penta 3 doses','Measles 1 doses','Malaria vaccine doses','Defaulters traced','Sessions held']
+};
+var CADRE_POOL = ['CHO','CHA','SECHN','SRN','MCH Aide','Nurse Aide','Midwife','Laboratory Technician',
+  'Pharmacy Technician','Data Officer','Vaccinator','Cleaner'];
+var FIRST_POOL = ['Mohamed','Fatmata','Alusine','Isatu','Abu','Mariama','Sahr','Kadiatu','Ibrahim','Aminata',
+  'Foday','Hawa','Santigie','Zainab','Momoh','Adama'];
+var LAST_POOL = ['Kamara','Sesay','Bangura','Conteh','Koroma','Turay','Mansaray','Kargbo','Jalloh','Bah',
+  'Fofanah','Kanu','Sankoh','Dumbuya'];
+
+var MONTH_NAME = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+/* every month from January 2025 up to the last complete month */
+var SERIES_START_YEAR = 2025, SERIES_START_MONTH = 1;
+function hfMonths(){
+  var out = [], d = new Date(SERIES_START_YEAR, SERIES_START_MONTH - 1, 1);
+  var end = new Date(); end.setDate(1); end.setMonth(end.getMonth() - 1);
+  while (d <= end && out.length < 120){
+    out.push({ year: d.getFullYear(), month: d.getMonth() + 1, label: MONTH_NAME[d.getMonth()] });
+    d.setMonth(d.getMonth() + 1);
+  }
+  if (!out.length) out.push({ year: SERIES_START_YEAR, month: SERIES_START_MONTH, label: MONTH_NAME[SERIES_START_MONTH - 1] });
+  return out;
+}
+function hfHash(v){
+  var h = 2166136261, str = String(v || '');
+  for (var i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; }
+  return h;
+}
+function hfPick(seed, n){ return hfHash(seed) % n; }
+function hfBetween(seed, lo, hi){ return lo + (hfHash(seed) % (hi - lo + 1)); }
+
+/* ---------- the one place to swap for Google Sheets ---------- */
+function hfExtras(f){
+  var id = f.key || f.name;
+  var infra = {
+    'Buildings': hfBetween(id + 'b', 1, 6),
+    'Beds': hfBetween(id + 'bed', 0, 24),
+    'Condition': ['Good','Fair','Needs repair'][hfPick(id + 'cond', 3)],
+    'Functional generator': hfPick(id + 'gen', 2) ? 'Yes' : 'No',
+    'Non-functional generator': hfPick(id + 'gennf', 2) ? 'Yes' : 'No',
+    'Solar power available': hfPick(id + 'solar', 2) ? 'Yes' : 'No',
+    'Electricity available': hfPick(id + 'elec', 2) ? 'Yes' : 'No',
+    'Water': ['Borehole','Piped','Well','None'][hfPick(id + 'wat', 4)],
+    'Toilets': hfBetween(id + 'toi', 0, 4),
+    'Cold chain': ['Working fridge','Solar fridge','None'][hfPick(id + 'cc', 3)],
+    'Network': ['4G','3G','Weak','None'][hfPick(id + 'net', 4)],
+    'Motorbike': hfPick(id + 'moto', 2) ? 'Yes' : 'No',
+    'Waste pit': hfPick(id + 'waste', 2) ? 'Yes' : 'No'
+  };
+  var services = {};
+  SERVICE_LIST.forEach(function(sv){ services[sv] = hfPick(id + sv, 10) > 2; });
+
+  var n = hfBetween(id + 'staff', 3, 9), st = [];
+  for (var i = 0; i < n; i++){
+    st.push({
+      name: FIRST_POOL[hfPick(id + 'f' + i, FIRST_POOL.length)] + ' ' + LAST_POOL[hfPick(id + 'l' + i, LAST_POOL.length)],
+      cadre: CADRE_POOL[hfPick(id + 'c' + i, CADRE_POOL.length)],
+      phone: '07' + hfBetween(id + 'p1' + i, 5, 9) + String(hfBetween(id + 'p2' + i, 100000, 999999))
+    });
+  }
+
+  /* twelve months of figures per programme, newest month last */
+  var ind = {};
+  PROGRAMMES.forEach(function(pg){
+    ind[pg] = hfMonths().map(function(m){
+      var row = { year: m.year, month: m.month, label: m.label, values: {} };
+      INDICATORS[pg].forEach(function(name){
+        row.values[name] = hfBetween(id + pg + name + m.year + m.month, 0, 480);
+      });
+      return row;
+    });
+  });
+  return { infrastructure: infra, services: services, staff: st, indicators: ind };
+}
+
+/* a facility already on the register keeps its real staff, the rest get the dummy list */
+function hfRegisterMatch(f){
+  var nm = String(f.name || '').toLowerCase().trim();
+  for (var i = 0; i < facilities.length; i++){
+    var r = facilities[i];
+    if (String(r.phu || '').toLowerCase().trim() === nm && r.district === f.district) return r;
+  }
+  return null;
+}
+
+function progToggle(pg){
+  progOpen[pg] = !progOpen[pg];
+  mlProfile();
+}
+function mlPick(key){
+  mlPicked = key;
+  mlProfile();
+}
+function mlFindByKey(key){
+  for (var i = 0; i < MASTER.length; i++) if (MASTER[i].key === key) return MASTER[i];
+  return null;
+}
+
+/* every block is built once into PARTS, so the same content serves the panel and the full screen view */
+var PARTS = {}, fsId = '', fsScroll = 0;
+
+function accBlock(id, label){
+  var part = PARTS[id];
+  if (!part) return '';
+  var open = !!sectOpen[id];
+  return '<div class="pacc' + (open ? ' open' : '') + '">'
+    + '<div class="pacc-head" onclick="sectToggle(\'' + id + '\')">'
+    + '<span>' + esc(label || part.title) + ((part.dummy && !label) ? '<span class="pdummy">dummy</span>' : '') + '</span>'
+    + '<span class="pacc-tools">'
+    + '<button type="button" class="pacc-fs" title="Full screen" onclick="event.stopPropagation();fsOpen(\'' + id + '\')">&#9974;</button>'
+    + '<span class="pacc-sign">' + (open ? '&minus;' : '+') + '</span></span></div>'
+    + (open ? '<div class="pacc-body">' + part.html + '</div>' : '')
+    + '</div>';
+}
+function sectToggle(id){
+  sectOpen[id] = !sectOpen[id];
+  mlProfile();
+}
+function progToggle(pg){
+  progOpen[pg] = !progOpen[pg];
+  mlProfile();
+}
+
+/* ---------- full screen ---------- */
+function fsOpen(id){
+  if (!PARTS[id]) return;
+  if (!fsId){ fsScroll = window.pageYOffset || document.documentElement.scrollTop || 0; }
+  fsId = id;
+  document.body.classList.add('fsmode');
+  fsRender();
+}
+function fsRender(){
+  var pane = document.getElementById('fsPane');
+  var part = PARTS[fsId];
+  if (!pane || !part) return;
+  var f = mlPicked ? mlFindByKey(mlPicked) : null;
+  pane.innerHTML = '<div class="fshead">'
+    + '<div><b>' + esc(part.title) + '</b>' + (f ? '<small>' + esc(f.name) + ', ' + esc(f.chiefdom) + ', ' + esc(f.district) + '</small>' : '') + '</div>'
+    + '<button type="button" class="btn ghost" onclick="fsClose()">Close full screen</button></div>'
+    + '<div class="fsbody">' + part.html + '</div>';
+  pane.style.display = 'flex';
+}
+function fsClose(){
+  fsId = '';
+  document.body.classList.remove('fsmode');
+  var pane = document.getElementById('fsPane');
+  if (pane){ pane.style.display = 'none'; pane.innerHTML = ''; }
+  window.scrollTo(0, fsScroll);
+}
+
+/* one line plot per indicator, drawn as plain SVG so nothing extra has to load.
+   Moving the pointer across a plot snaps to the nearest month and reads it out. */
+function ymLabel(r){ return r.year + '-' + (r.month < 10 ? '0' + r.month : r.month); }
+
+var PLOT_GEO = { W:860, H:340, L:82, R:18, T:48, B:94 };
+
+function linePlot(title, rows, col, pg){
+  var g = PLOT_GEO;
+  var vals = rows.map(function(r){ return r.values[col]; });
+  var labs = rows.map(ymLabel);
+  var n = vals.length;
+  var max = Math.max.apply(null, vals), min = Math.min.apply(null, vals);
+  var span = (max - min) || 1;
+  var pw = g.W - g.L - g.R, ph = g.H - g.T - g.B;
+  var px = function(i){ return n > 1 ? g.L + (i * pw / (n - 1)) : g.L + pw / 2; };
+  var py = function(v){ return g.T + (1 - (v - min) / span) * ph; };
+
+  var pts = vals.map(function(v, i){ return px(i).toFixed(1) + ',' + py(v).toFixed(1); }).join(' ');
+  var area = g.L + ',' + (g.T + ph) + ' ' + pts + ' ' + px(n - 1).toFixed(1) + ',' + (g.T + ph);
+  var dots = vals.map(function(v, i){
+    return '<circle cx="' + px(i).toFixed(1) + '" cy="' + py(v).toFixed(1) + '" r="3" fill="#004080"/>';
+  }).join('');
+  var ticks = rows.map(function(r, i){
+    var X = px(i).toFixed(1), Y = (g.T + ph + 10);
+    return '<line x1="' + X + '" y1="' + (g.T + ph) + '" x2="' + X + '" y2="' + (g.T + ph + 4) + '" stroke="#c6d3de"/>'
+      + '<text x="' + X + '" y="' + Y + '" class="plot-ax" text-anchor="end" '
+      + 'transform="rotate(-55 ' + X + ' ' + Y + ')">' + labs[i] + '</text>';
+  }).join('');
+
+  var total = vals.reduce(function(a,b){ return a + b; }, 0);
+  var mid = Math.round((max + min) / 2);
+
+  var heading = (pg ? pg + ': ' : '') + title;
+  return '<div class="plot" data-vals="' + esc(JSON.stringify(vals)) + '" data-labs="' + esc(JSON.stringify(labs)) + '">'
+    + '<div class="plot-head"><span>' + esc(heading) + '</span><b>total ' + total + '</b></div>'
+    + '<div class="plot-box">'
+    + '<svg viewBox="0 0 ' + g.W + ' ' + g.H + '" preserveAspectRatio="none" role="img">'
+    + '<line x1="' + g.L + '" y1="' + g.T + '" x2="' + (g.W - g.R) + '" y2="' + g.T + '" stroke="#e3eaf1"/>'
+    + '<line x1="' + g.L + '" y1="' + (g.T + ph / 2) + '" x2="' + (g.W - g.R) + '" y2="' + (g.T + ph / 2) + '" stroke="#e3eaf1"/>'
+    + '<line x1="' + g.L + '" y1="' + (g.T + ph) + '" x2="' + (g.W - g.R) + '" y2="' + (g.T + ph) + '" stroke="#c6d3de"/>'
+    + '<line x1="' + g.L + '" y1="' + g.T + '" x2="' + g.L + '" y2="' + (g.T + ph) + '" stroke="#c6d3de"/>'
+    + '<polygon points="' + area + '" fill="#004080" opacity="0.08"/>'
+    + '<polyline points="' + pts + '" fill="none" stroke="#004080" stroke-width="2.2" stroke-linejoin="round"/>'
+    + dots + ticks
+    + '<line class="pguide" x1="0" y1="' + g.T + '" x2="0" y2="' + (g.T + ph) + '" stroke="#b3261e" stroke-width="1.2" stroke-dasharray="4 4" opacity="0"/>'
+    + '<circle class="pfocus" r="5.5" fill="#fff" stroke="#b3261e" stroke-width="2.5" opacity="0"/>'
+    + '<text x="' + (g.L - 9) + '" y="' + (g.T + 5) + '" text-anchor="end" class="plot-ax">' + max + '</text>'
+    + '<text x="' + (g.L - 9) + '" y="' + (g.T + ph / 2 + 4) + '" text-anchor="end" class="plot-ax">' + mid + '</text>'
+    + '<text x="' + (g.L - 9) + '" y="' + (g.T + ph + 4) + '" text-anchor="end" class="plot-ax">' + min + '</text>'
+    /* chart title, then the two axis titles */
+    + '<text x="' + (g.L + pw / 2) + '" y="24" text-anchor="middle" class="plot-title">' + esc(heading) + '</text>'
+    + '<text x="' + (g.L + pw / 2) + '" y="40" text-anchor="middle" class="plot-sub">January 2025 to ' + esc(labs[n-1]) + ', monthly</text>'
+    + '<text x="' + (g.L + pw / 2) + '" y="' + (g.H - 8) + '" text-anchor="middle" class="plot-lab">Month (yyyy-mm)</text>'
+    + '<text x="20" y="' + (g.T + ph / 2) + '" text-anchor="middle" class="plot-lab" '
+    + 'transform="rotate(-90 20 ' + (g.T + ph / 2) + ')">' + esc(title) + ' (number)</text>'
+    + '</svg>'
+    + '<div class="ptip"></div>'
+    + '</div></div>';
+}
+
+/* ---------- pointer readout ---------- */
+var lastPlot = null;
+function plotClear(){
+  if (!lastPlot) return;
+  var gu = lastPlot.querySelector('.pguide'), fo = lastPlot.querySelector('.pfocus'), tip = lastPlot.querySelector('.ptip');
+  if (gu) gu.setAttribute('opacity', '0');
+  if (fo) fo.setAttribute('opacity', '0');
+  if (tip) tip.style.display = 'none';
+  lastPlot = null;
+}
+function plotMove(ev){
+  var pt = ev.touches && ev.touches[0] ? ev.touches[0] : ev;
+  var el = document.elementFromPoint ? (ev.target || null) : null;
+  var plot = (ev.target && ev.target.closest) ? ev.target.closest('.plot') : null;
+  if (!plot){ plotClear(); return; }
+  if (lastPlot && lastPlot !== plot) plotClear();
+  lastPlot = plot;
+
+  var svg = plot.querySelector('svg');
+  var box = svg.getBoundingClientRect();
+  if (!box.width) return;
+  var g = PLOT_GEO;
+  var vals = JSON.parse(plot.getAttribute('data-vals'));
+  var labs = JSON.parse(plot.getAttribute('data-labs'));
+  var n = vals.length;
+  var max = Math.max.apply(null, vals), min = Math.min.apply(null, vals);
+  var span = (max - min) || 1;
+  var pw = g.W - g.L - g.R, ph = g.H - g.T - g.B;
+
+  var vx = (pt.clientX - box.left) / box.width * g.W;
+  var i = n > 1 ? Math.round((vx - g.L) / (pw / (n - 1))) : 0;
+  if (i < 0) i = 0;
+  if (i > n - 1) i = n - 1;
+
+  var X = n > 1 ? g.L + (i * pw / (n - 1)) : g.L + pw / 2;
+  var Y = g.T + (1 - (vals[i] - min) / span) * ph;
+
+  var gu = plot.querySelector('.pguide'), fo = plot.querySelector('.pfocus'), tip = plot.querySelector('.ptip');
+  gu.setAttribute('x1', X); gu.setAttribute('x2', X); gu.setAttribute('opacity', '1');
+  fo.setAttribute('cx', X); fo.setAttribute('cy', Y); fo.setAttribute('opacity', '1');
+
+  tip.innerHTML = '<b>' + labs[i] + '</b> ' + vals[i];
+  tip.style.display = 'block';
+  var leftPx = (X / g.W) * box.width;
+  var topPx = (Y / g.H) * box.height;
+  tip.style.left = Math.max(4, Math.min(box.width - 4, leftPx)) + 'px';
+  tip.style.top = Math.max(0, topPx - 34) + 'px';
+}
+document.addEventListener('mousemove', plotMove, { passive:true });
+document.addEventListener('touchmove', plotMove, { passive:true });
+document.addEventListener('mouseleave', plotClear, true);
+
+function progAcc(pg, x){
+  var open = !!progOpen[pg];
+  var rows = x.indicators[pg];
+  var cols = INDICATORS[pg];
+  var totals = {};
+  cols.forEach(function(c){ totals[c] = 0; });
+  rows.forEach(function(r){ cols.forEach(function(c){ totals[c] += r.values[c]; }); });
+
+  var table = '<div class="pscroll"><table class="ptable itable">'
+    + '<tr><th>Year</th><th>Month</th>' + cols.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>'
+    + rows.map(function(r){
+        return '<tr><td>' + r.year + '</td><td>' + esc(r.label) + '</td>'
+          + cols.map(function(c){ return '<td>' + r.values[c] + '</td>'; }).join('') + '</tr>';
+      }).join('')
+    + '<tr class="trow"><td colspan="2">Total</td>'
+    + cols.map(function(c){ return '<td>' + totals[c] + '</td>'; }).join('') + '</tr>'
+    + '</table></div>';
+
+  var plots = '<div class="plots">' + cols.map(function(c){ return linePlot(c, rows, c, pg); }).join('') + '</div>';
+
+  PARTS['prog_' + pg + '_data'] = { title: pg + ' data', html: table, dummy: true };
+  PARTS['prog_' + pg + '_plot'] = { title: pg + ' plots', html: plots, dummy: true };
+  var body = accBlock('prog_' + pg + '_data', 'Data') + accBlock('prog_' + pg + '_plot', 'Plot');
+
+  PARTS['prog_' + pg] = { title: pg + ' indicators', html: table + plots, dummy: true };
+
+  return '<div class="pacc' + (open ? ' open' : '') + '">'
+    + '<div class="pacc-head" onclick="progToggle(\'' + pg + '\')">'
+    + '<span>' + esc(pg) + '</span>'
+    + '<span class="pacc-tools">'
+    + '<button type="button" class="pacc-fs" title="Full screen" onclick="event.stopPropagation();fsOpen(\'prog_' + pg + '\')">&#9974;</button>'
+    + '<span class="pacc-sign">' + (open ? '&minus;' : '+') + '</span></span></div>'
+    + (open ? '<div class="pacc-body">' + body + '</div>' : '')
+    + '</div>';
+}
+
+function mlProfile(){
+  var box = document.getElementById('facProfile');
+  if (!box) return;
+  var f = mlPicked ? mlFindByKey(mlPicked) : null;
+
+  if (!f){
+    PARTS = {};
+    box.innerHTML = '<h2>Facility profile</h2>'
+      + '<p class="pempty">Click any point on the map to read that facility here: its infrastructure, '
+      + 'the services it offers, the staff with cadre and telephone, and the key indicators for '
+      + 'Malaria, TB, HIV, NTD, Nutrition and EPI.</p>';
+    if (fsId) fsClose();
+    return;
+  }
+
+  var x = hfExtras(f);
+  var reg = hfRegisterMatch(f);
+  var regStaff = reg ? facStaff(reg.id).sort(function(a,b){ return a.name.localeCompare(b.name); }) : [];
+  var useReal = regStaff.length > 0;
+  var list = useReal
+    ? regStaff.map(function(s){ return { name:s.name, cadre:s.cadre, phone:s.phone }; })
+    : x.staff;
+
+  PARTS = {};
+
+  var det = '<div class="pkv"><span>Chiefdom and district</span><b>' + esc(f.chiefdom) + ', ' + esc(f.district) + '</b></div>'
+    + '<div class="pkv"><span>Type and ownership</span><b>' + esc(f.type) + ', ' + esc(f.owner) + '</b></div>'
+    + (f.community ? '<div class="pkv"><span>Community</span><b>' + esc(f.community) + '</b></div>' : '')
+    + '<div class="pkv"><span>Functional status</span><b>' + esc(f.func) + '</b></div>'
+    + '<div class="pkv"><span>DHIS2</span><b>' + esc(f.dhis2) + (f.code ? ', code ' + esc(f.code) : '') + '</b></div>'
+    + '<div class="pkv"><span>Coordinates</span><b>'
+    + (f.lat !== null && f.lng !== null ? f.lat.toFixed(5) + ', ' + f.lng.toFixed(5) : 'missing') + '</b></div>';
+  PARTS.details = { title:'Facility details', html:det, dummy:false };
+
+  var infra = '';
+  Object.keys(x.infrastructure).forEach(function(k){
+    infra += '<div class="pkv"><span>' + esc(k) + '</span><b>' + esc(x.infrastructure[k]) + '</b></div>';
+  });
+  PARTS.infra = { title:'Infrastructure', html:infra, dummy:true };
+
+  var svc = '<div class="pchips">';
+  Object.keys(x.services).forEach(function(k){
+    svc += '<span class="pchip ' + (x.services[k] ? 'yes' : 'no') + '">' + esc(k) + '</span>';
+  });
+  svc += '</div>';
+  PARTS.services = { title:'Services offered', html:svc, dummy:true };
+
+  var stf = '<table class="ptable"><tr><th>Name</th><th>Cadre</th><th>Telephone</th></tr>'
+    + list.map(function(s){
+        return '<tr><td>' + esc(s.name) + '</td><td>' + esc(s.cadre) + '</td><td>' + esc(s.phone) + '</td></tr>';
+      }).join('') + '</table>';
+  PARTS.staff = { title:'Staff (' + list.length + ')', html:stf, dummy:!useReal };
+
+  var prog = '';
+  PROGRAMMES.forEach(function(pg){ prog += progAcc(pg, x); });
+  PARTS.indicators = { title:'Key indicators by programme', html:prog, dummy:true };
+
+  box.innerHTML = '<h2>' + esc(f.name) + '</h2>'
+    + accBlock('details') + accBlock('infra') + accBlock('services')
+    + accBlock('staff') + accBlock('indicators');
+
+  if (fsId){
+    if (PARTS[fsId]) fsRender();
+    else fsClose();
+  }
+}
+
 function mlPaint(){
+  mlProfile();
   var rows = mlFiltered();
   var mapped = rows.filter(function(f){ return f.lat !== null && f.lng !== null; });
   var missing = rows.length - mapped.length;
@@ -2514,14 +2994,9 @@ function mlPaint(){
     }).bindTooltip(
       '<b>' + esc(f.name) + '</b><br>' + esc(f.type) + ' &middot; ' + esc(f.chiefdom),
       { direction:'top', offset:[0,-6], opacity:1, className:'fac-tip' }
-    ).bindPopup(
-      '<b>' + esc(f.name) + '</b><br>' + esc(f.type) + ', ' + esc(f.owner) +
-      '<br>' + esc(f.chiefdom) + ', ' + esc(f.district) +
-      '<br>' + esc(f.func) + ' &middot; ' + esc(f.dhis2) +
-      (f.code ? '<br>Code: ' + esc(f.code) : '') +
-      '<br>' + f.lat.toFixed(5) + ', ' + f.lng.toFixed(5)
     ).on('mouseover', function(){ this.setStyle({ radius:8, weight:3 }); })
      .on('mouseout',  function(){ this.setStyle({ radius:5, weight:2 }); })
+     .on('click', (function(key){ return function(){ mlPick(key); }; })(f.key))
      .addTo(hfLayer);
   });
   var shown = geoRedraw();
@@ -2529,7 +3004,7 @@ function mlPaint(){
   if (shown){
     try {
       var gb = shown.getBounds();
-      if (gb.isValid()){ hfMap.fitBounds(gb.pad(0.04)); fitted = true; }
+      if (gb.isValid()){ lastFit = gb; hfMap.fitBounds(gb, { padding:[2,2] }); fitted = true; }
     } catch (e) {}
   }
   if (!fitted && mapped.length){
@@ -2537,8 +3012,8 @@ function mlPaint(){
       var pts = mapped.map(function(f){ return [f.lat, f.lng]; });
       var pb = L.latLngBounds(pts);
       if (pb.isValid()){
-        if (mapped.length === 1) hfMap.setView(pts[0], 13);
-        else hfMap.fitBounds(pb.pad(0.08));
+        if (mapped.length === 1){ lastFit = null; hfMap.setView(pts[0], 13); }
+        else { lastFit = pb; hfMap.fitBounds(pb, { padding:[6,6] }); }
       }
     } catch (e) {}
   }
@@ -2646,6 +3121,15 @@ function geoDraw(gj){
   geoData = gj;
   mlPaint();
 }
+/* the box is sized by its column, so after any size change the view is set again,
+   otherwise Leaflet keeps the old width and the country drifts to one side */
+function hfRefit(){
+  if (!hfMap) return;
+  hfMap.invalidateSize(false);
+  if (lastFit){
+    try { hfMap.fitBounds(lastFit, { padding:[2,2] }); } catch (e) {}
+  }
+}
 function mlShow(){
   if (!mlReady){
     fillSel('mDistrict', uniq('district'), 'All districts');
@@ -2674,10 +3158,9 @@ function mlShow(){
     }).setView([8.46, -11.78], 7);
     hfMap.createPane('boundaries');
     if (window.ResizeObserver){
-      new ResizeObserver(function(){ if (hfMap) hfMap.invalidateSize(false); })
-        .observe(document.getElementById('hfMap'));
+      new ResizeObserver(function(){ hfRefit(); }).observe(document.getElementById('hfMap'));
     }
-    window.addEventListener('resize', function(){ if (hfMap) hfMap.invalidateSize(false); });
+    window.addEventListener('resize', function(){ hfRefit(); });
     window.addEventListener('orientationchange', function(){
       setTimeout(function(){ if (hfMap){ hfMap.invalidateSize(false); mlPaint(); } }, 250);
     });
@@ -2690,7 +3173,8 @@ function mlShow(){
       .catch(function(err){ console.log('[boundaries]', err); mlPaint(); });
     baseApply('geo');
   }
-  setTimeout(function(){ if (hfMap) hfMap.invalidateSize(); mlPaint(); }, 60);
+  setTimeout(function(){ hfRefit(); mlPaint(); hfRefit(); }, 60);
+  setTimeout(hfRefit, 300);
 }
 /* the master list also drives the district and chiefdom pickers on the Add facility form */
 (function(){
@@ -2956,5 +3440,6 @@ function init(){
 init();
 show('guide');
 </script>
+<div class="fspane" id="fsPane" style="display:none"></div>
 </body>
 </html>
