@@ -2818,7 +2818,7 @@ function cacheNote(){
 /* ---------- reading the Google Sheet directly ---------- */
 function gvizUrl(tabName){
   return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
-    + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(tabName) + '&t=' + Date.now();
+    + '/gviz/tq?tqx=out:csv&headers=1&sheet=' + encodeURIComponent(tabName) + '&t=' + Date.now();
 }
 function csvRows(text){
   var lines = String(text || '').split(/\r?\n/).filter(function(l){ return l.trim() !== ''; });
@@ -2922,46 +2922,100 @@ function loadSheetWorkbook(){
    only for the facility on screen and keeps what comes back. */
 var indState = {};   /* facility key -> loading | ready | empty | failed */
 
-function indQueryUrl(key){
-  var q = "select * where A = '" + String(key).replace(/'/g, "''") + "'";
+function indQueryUrl(where){
   return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID
-    + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(SHEET_TABS.ind)
-    + '&tq=' + encodeURIComponent(q);
+    + '/gviz/tq?tqx=out:csv&headers=1&sheet=' + encodeURIComponent(SHEET_TABS.ind)
+    + '&tq=' + encodeURIComponent('select * where ' + where) + '&t=' + Date.now();
 }
+function sqlText(v){ return "'" + String(v == null ? '' : v).replace(/'/g, "''") + "'"; }
+/* by header name first, and by column position when the sheet uses other names */
 function indRowShape(r){
-  return { key:String(r['Facility Key'] || ''), programme:String(r['Programme'] || ''),
-           indicator:String(r['Indicator'] || ''), year:Number(r['Year']),
-           month:Number(r['Month']), value:Number(r['Value']) };
+  var vals = [];
+  for (var k in r) vals.push(r[k]);
+  var pick = function(name, pos){
+    if (r[name] !== undefined && String(r[name]).trim() !== '') return r[name];
+    return vals[pos] === undefined ? '' : vals[pos];
+  };
+  return {
+    key: String(pick('Facility Key', 0) || '').trim(),
+    programme: String(pick('Programme', 4) || '').trim(),
+    indicator: String(pick('Indicator', 5) || '').trim(),
+    year: Number(pick('Year', 6)),
+    month: Number(pick('Month', 7)),
+    value: Number(pick('Value', 8))
+  };
 }
 function indRowOk(x){ return x.key && x.programme && x.indicator && x.year && x.month; }
+
+var indWhy = {};   /* facility key -> what the last attempt did, shown in the panel */
 
 function loadIndicators(key){
   if (!SHEET_ID || !key) return Promise.resolve('empty');
   if (indState[key]) return Promise.resolve(indState[key]);
   indState[key] = 'loading';
-  var finish = function(out, fromCache, at){
+
+  var fac = mlFindByKey(key);
+  var finish = function(out, how, fromCache, at){
     if (out.length) applySheetData({ sheetIndicators: out, keepExisting: true });
     if (fromCache) markCacheUse(at);
     indState[key] = out.length ? 'ready' : 'empty';
+    indWhy[key] = how + ', ' + out.length + ' rows';
     if (mlPicked === key) mlProfile();
     return indState[key];
   };
-  return fetch(indQueryUrl(key))
-    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-    .then(csvRows)
+  var grab = function(where){
+    return fetch(indQueryUrl(where))
+      .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(function(text){
+        if (text.indexOf('/*O_o*/') === 0 || text.indexOf('google.visualization.Query.setResponse') > -1){
+          throw new Error('the sheet answered with an error, check the tab name and the sharing');
+        }
+        return csvRows(text).map(indRowShape).filter(indRowOk);
+      });
+  };
+
+  /* the Facility Key first, then the facility name, in case the two tabs were keyed differently */
+  return grab('A = ' + sqlText(key))
     .then(function(rows){
-      var out = rows.map(indRowShape).filter(indRowOk);
-      if (out.length) cacheSet(ck('ind:' + key), { at: stamp(), rows: out });
-      return finish(out, false);
+      if (rows.length) return finish(rows, 'matched on Facility Key', false);
+      if (!fac || !fac.name) return finish([], 'no row carries this Facility Key', false);
+      return grab('B = ' + sqlText(fac.name)).then(function(byName){
+        /* those rows are keyed differently in the sheet, so file them under this facility */
+        var mine = byName.map(function(r){ r.key = key; return r; });
+        return finish(mine, mine.length ? 'matched on the facility name' : 'no row for this facility', false);
+      });
     })
-    .catch(function(){
+    .then(function(state){
+      /* keep whatever came back for the next time there is no connection */
+      var holder = SHEET.ind[key];
+      if (holder) cacheSet(ck('ind:' + key), { at: stamp(), rows: indRowsOf(key) });
+      return state;
+    })
+    .catch(function(err){
       return cacheGet(ck('ind:' + key)).then(function(hit){
-        if (hit && hit.rows) return finish(hit.rows, true, hit.at);
+        if (hit && hit.rows) return finish(hit.rows, 'read from the copy saved on this device', true, hit.at);
         indState[key] = 'failed';
+        indWhy[key] = String(err && err.message ? err.message : err);
         if (mlPicked === key) mlProfile();
         return 'failed';
       });
     });
+}
+/* flatten what is held for one facility, for the offline copy */
+function indRowsOf(key){
+  var out = [], holder = SHEET.ind[key];
+  if (!holder) return out;
+  Object.keys(holder.programmes).forEach(function(pg){
+    var p = holder.programmes[pg];
+    Object.keys(p.months).forEach(function(ym){
+      var parts = ym.split('-');
+      p.order.forEach(function(nm){
+        if (p.months[ym][nm] === undefined) return;
+        out.push({ key:key, programme:pg, indicator:nm, year:Number(parts[0]), month:Number(parts[1]), value:p.months[ym][nm] });
+      });
+    });
+  });
+  return out;
 }
 
 /* ---------- the one place to swap for Google Sheets ---------- */
@@ -3299,9 +3353,13 @@ function mlProfile(){
   } else if (state === 'loading' || state === undefined){
     prog = '<p class="pempty">Reading the Indicators sheet for this facility.</p>';
   } else if (state === 'failed'){
-    prog = '<p class="pempty">The Indicators sheet could not be read. Check that the sheet is shared with anyone who has the link.</p>';
+    prog = '<p class="pempty">The Indicators sheet could not be read: ' + esc(indWhy[f.key] || 'unknown')
+      + '. Check that the sheet is shared with anyone who has the link and that the tab is called '
+      + esc(SHEET_TABS.ind) + '.</p>';
   } else {
-    prog = none('Indicators sheet');
+    prog = '<p class="pempty">Nothing is recorded in the Indicators sheet yet for this facility'
+      + (indWhy[f.key] ? ' (' + esc(indWhy[f.key]) + ')' : '')
+      + '. The key looked for is <code>' + esc(f.key) + '</code>.</p>';
   }
   PARTS.indicators = { title:'Key indicators by programme', html:prog, dummy:false };
 
